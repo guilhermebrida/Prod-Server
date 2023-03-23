@@ -7,7 +7,7 @@ import mysql.connector
 from mysql.connector import Error
 import psycopg2
 
-
+print("consegui")
 ips = []
 ALREADY_LISTEN = []
 RSN_DICT = {}
