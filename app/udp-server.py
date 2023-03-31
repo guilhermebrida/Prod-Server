@@ -6,8 +6,9 @@ from tkinter import filedialog as dlg
 import mysql.connector
 from mysql.connector import Error
 import psycopg2
+import os
 
-print("consegui")
+
 ips = []
 ALREADY_LISTEN = []
 RSN_DICT = {}
@@ -16,14 +17,38 @@ cabeçalho =  'BINAVSFB'
 bloc =''
 bloco =[]
 
+# Lê as variáveis de ambiente
+# postgres_host = os.environ['POSTGRES_HOST']
+# postgres_port = os.environ['POSTGRES_PORT']
+# postgres_user = os.environ['POSTGRES_USER']
+# postgres_password = os.environ['POSTGRES_PASSWORD']
+# postgres_db = os.environ['POSTGRES_DB']
 
+# print('HOST:{}  PORTA:{}   DB:{}  USER:{}  PASS:{} '.format(postgres_host,postgres_port,postgres_db,postgres_user,postgres_password))
 
-ENDPOINT="ec2-52-91-118-43.compute-1.amazonaws.com"
+# Usa as variáveis de ambiente para se conectar ao banco de dados
+# connection = psycopg2.connect(
+#     # host=postgres_host,
+#     host="postgres",
+#     port=postgres_port,
+#     user=postgres_user,
+#     password=postgres_password,
+#     dbname=postgres_db
+# )
+
+#CONECTA COM BANCO REAL
+# ENDPOINT="ec2-52-91-118-43.compute-1.amazonaws.com"
+# PORT="5432"
+# USER="postgres"
+# # REGION="us-east-2a"
+# DBNAME="gb"
+
+#CONECT COM LOCALHOST NA MÃO
+ENDPOINT="postgres"
+# ENDPOINT="localhost"
 PORT="5432"
 USER="postgres"
-# REGION="us-east-2a"
-DBNAME="gb"
-
+DBNAME="postgres"
 connection = psycopg2.connect(host=ENDPOINT, user=USER, password='postgres', port=PORT, database=DBNAME)
 cursor = connection.cursor()
 
@@ -113,7 +138,7 @@ class udp():
             print('dict',RSN_DICT)
             sn2 = RSN_DICT[device_id]
             sn = RSN_DICT.get(device_id, 'nao encontrado')
-            cursor.execute(f'INSERT INTO gb.copilotos (IMEI, SN, FDIR) VALUES ("{device_id}","{sn2}","{self.vozes}");')
+            cursor.execute(f'INSERT INTO copilotos.vozes (IMEI, SN, FDIR) VALUES ("{device_id}","{sn2}","{self.vozes}");')
             connection.commit()
         except:
             pass
@@ -137,8 +162,9 @@ async def main():
     loop = asyncio.get_running_loop()
     transport, protocol = await loop.create_datagram_endpoint(
         lambda: MyDatagramProtocol(),
-        local_addr=('192.168.0.116', 10116),
-        # local_addr=('', 10116),
+        # local_addr=('192.168.0.116', 10116),
+        # local_addr=('127.0.0.11', 10116),
+        local_addr=('0.0.0.0', 10117),
         family=socket.AF_INET)
     print(f"Server started on {transport.get_extra_info('sockname')}")
 
@@ -156,10 +182,11 @@ async def main():
 
 if __name__ == "__main__":
     try:
-        cursor.execute('SELECT * FROM gb.vozes;')
+        cursor.execute('SELECT * FROM copilotos.vozes;')
         result = cursor.fetchall()
         print(result)
-        path = dlg.askopenfilenames()
+        # path = dlg.askopenfilenames()
+        path = 'C:\\Python scripts\\server-UDP\\udp\\app-docker\\Docker_python\\app\\Vozes\\00000001_MP3.SFB'
         if path:
             asyncio.run(main())
     except KeyboardInterrupt:
@@ -168,67 +195,16 @@ if __name__ == "__main__":
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# import asyncio
 # import socket
-# import XVM
 
-# class MyDatagramProtocol(asyncio.DatagramProtocol):
-#     def connection_made(self, transport):
-#         self.transport = transport
-#         self.ids = []
+# UDP_IP = "0.0.0.0"
+# UDP_PORT = 10117
 
-#     def datagram_received(self, data, addr):
-#         asyncio.create_task(handle_request(data, addr, self.transport))
+# sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+# sock.bind((UDP_IP, UDP_PORT))
 
-# async def handle_request(data, addr, transport):
-    
-#     message = data.decode(errors='ignore')
-#     print(f"Received message from {addr}: {message}")
-#     if XVM.isValidXVM(message):
-#         xvmMessage = XVM.parseXVM(message)
-#         msg = xvmMessage[0]
-#         device_id = xvmMessage[1]
-#         response = XVM.generateXVM(device_id,str(8000).zfill(4),'>QSN<')
-#         await asyncio.sleep(1) # Simulando uma resposta demorada
-#         transport.sendto(response.encode(), addr)
-#         print(f"Sent response to {addr}: {response}")
+# print("Server listening on port", UDP_PORT)
 
-
-# async def main():
-#     loop = asyncio.get_running_loop()
-#     transport, protocol = await loop.create_datagram_endpoint(
-#         lambda: MyDatagramProtocol(),
-#         local_addr=('192.168.0.116', 10116),
-#         family=socket.AF_INET)
-#     print(f"Server started on {transport.get_extra_info('sockname')}")
-
-#     try:
-#         while True:
-#             await asyncio.sleep(0.1)
-#     except asyncio.CancelledError:
-#         pass
-#     finally:
-#         transport.close()
-
-# if __name__ == "__main__":
-#     try:
-#         ips = []
-#         asyncio.run(main())
-#     except KeyboardInterrupt:
-#         pass
+# while True:
+#     data, addr = sock.recvfrom(1024)
+#     print("Received message:", data.decode())

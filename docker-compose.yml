@@ -1,0 +1,56 @@
+
+version: "2.1"
+
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      # - "10116:5000"
+      - "10116:10117/udp"
+    depends_on:
+      - postgres
+    environment:
+      - ENDPOINT=postgres
+    links:
+      - postgres
+    networks:
+      - backing-services
+
+  postgres: 
+    image: postgres:14-alpine3.15
+    ports: ["5432:5432"]
+    restart: always
+    networks: [backing-services] 
+    volumes:
+      - ./app:/data
+      - /mnt/c/Python scripts/server-UDP/udp/app-docker/Docker_python/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    # hostname: "ec2-3-85-175-98.compute-1.amazonaws.com"
+
+
+  # grafana:
+  #   image: grafana/grafana-oss:latest
+  #   ports: ["3000:3000"]
+  #   networks: [backing-services]
+  #   volumes: ["./app:/grafana_data"]
+  #   # hostname: "ec2-3-85-175-98.compute-1.amazonaws.com"
+
+  socat:
+    image: alpine/socat
+    command: socat TCP4-LISTEN:10116,fork,reuseaddr TCP4:127.0.0.1:10117
+
+volumes:
+  postgres_data:
+
+networks: 
+  backing-services:
+    driver: bridge
+
+
+
+
+
