@@ -43,7 +43,7 @@ ENV POSTGRES_PASSWORD=postgres
 ENV POSTGRES_DB=postgres
 
 # Expõe a porta para a aplicação
-EXPOSE 10116/udp
+# EXPOSE 10116/udp
 
 # Executa a aplicação
 

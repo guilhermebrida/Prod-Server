@@ -3,8 +3,8 @@ import socket
 import XVM
 import re
 from tkinter import filedialog as dlg
-import mysql.connector
-from mysql.connector import Error
+# import mysql.connector
+# from mysql.connector import Error
 import psycopg2
 import os
 
@@ -105,6 +105,7 @@ class udp():
         sn = RSN_DICT[device_id]
         VOZ.append(device_id)
         for files in path:
+            print(files)
             f=open(f'{files}','rb')
             conteudo = f.read()
             separar = [conteudo[i:i+520]for i in range(0,len(conteudo),520)]
@@ -162,8 +163,10 @@ async def main():
     loop = asyncio.get_running_loop()
     transport, protocol = await loop.create_datagram_endpoint(
         lambda: MyDatagramProtocol(),
+        # local_addr=('192.168.0.116', 65117),
         # local_addr=('192.168.0.116', 10116),
         # local_addr=('127.0.0.11', 10116),
+        # local_addr=('191.4.146.247', 10116),
         local_addr=('0.0.0.0', 10117),
         family=socket.AF_INET)
     print(f"Server started on {transport.get_extra_info('sockname')}")
@@ -176,7 +179,17 @@ async def main():
     finally:
         transport.close()
 
-
+path = []
+def find():
+    pasta = "./app/Vozes/"
+    arquivos = os.listdir(pasta)
+    for arquivo in arquivos:
+        print('puro',arquivo)
+        caminho_arquivo = os.path.join(pasta, arquivo)
+        if os.path.isfile(caminho_arquivo):
+            print(caminho_arquivo)
+            path.append(caminho_arquivo)
+    return path
 
 
 
@@ -186,7 +199,15 @@ if __name__ == "__main__":
         result = cursor.fetchall()
         print(result)
         # path = dlg.askopenfilenames()
-        path = 'C:\\Python scripts\\server-UDP\\udp\\app-docker\\Docker_python\\app\\Vozes\\00000001_MP3.SFB'
+        # nome_arquivo = "00000001_MP3.SFB"
+        # for root, dirs, files in os.walk("."):
+        #     if nome_arquivo in files:
+        #         caminho_arquivo = os.path.join(root, nome_arquivo)
+        #         print("Caminho do arquivo encontrado:", caminho_arquivo)
+        #         break
+        # else:
+        #     print("Arquivo não encontrado.")
+        path = find()
         if path:
             asyncio.run(main())
     except KeyboardInterrupt:
@@ -194,17 +215,3 @@ if __name__ == "__main__":
 
 
 
-
-# import socket
-
-# UDP_IP = "0.0.0.0"
-# UDP_PORT = 10117
-
-# sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-# sock.bind((UDP_IP, UDP_PORT))
-
-# print("Server listening on port", UDP_PORT)
-
-# while True:
-#     data, addr = sock.recvfrom(1024)
-#     print("Received message:", data.decode())
