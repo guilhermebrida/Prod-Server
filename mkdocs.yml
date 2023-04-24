@@ -1,0 +1,13 @@
+site_name: App Produção
+theme:
+  name: readthedocs
+plugins:
+- search 
+- mkdocstrings:
+    handlers:
+      python:
+        setup_commands:
+          - import sys
+          - sys.path.append("app")
+    watch: 
+      - app

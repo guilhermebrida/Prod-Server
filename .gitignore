@@ -1,0 +1,5 @@
+"/site/" 
+__pycache__/
+.vscode/
+.Dockerfile.swp
+.docker-compose.yml.swp

@@ -1,0 +1,732 @@
+//**************************************************************
+//*															   *
+//*	         Script Configuração Base VL8	       	   		   *
+//*															   *
+//**************************************************************
+
+//*********************
+//*   Inicialização   *
+//*********************
+
+//Desliga Modo Sleep
+>VSKO000000000000<
+
+//Limpa os contadores Numericos
+>SCT0095 0<
+
+//Limpa as Flags
+>SCT96 0<
+
+//Configura a memória de registros e logger
+>VSLG0000,16384,679936<
+
+//Liga perifericos
+>VSLP_GPS1_MDM1_MF0_RF0_WF1<
+
+//Configura Motorista Padrão
+>STB000 PLN000000000000,4,12<
+
+//Velocidade no GP
+>SGG_SCT64<
+
+//Desabilitar CAN Primaria para usar como entradas digitais
+>VS19_ENA0,0<
+
+//Desabilita CAN Secundaria
+>VS29_ENA0,0<
+
+//Desliga a Saidas
+>SSXP00<
+>SSXP10<
+>SSXP20<
+
+//Configura as tensões de operação
+>VSPK,2350,2200,970,930,0360,0340,0350,0340,0350,0340,0430,0425,0340,0800,0450,+50,+70,0130,0250,0020,999,A5,001<
+
+//Configura IN00 como pos chave
+>SIT0003003_AD<
+
+//--------------------------------------------------------------------------
+
+//***************************************
+//*      Mensagens Personalizadas       *
+//*            Versão 0.6               *
+//***************************************
+
+//Mensagem de rastreamento
+>SUC00 PLN0.6,4,3 QGP,4,40 QUV01,9,44 QAD,40,8 QTB000,8,16 QGV,29,3 QCT27_1D,7,5 QCT01_1D,7,8 GVDVCT02/360,17,7<
+>SUC01 GVHVCT18,14,4 QCT19_1D,7,8 QCT92_1H,7,8 QCT78_8H,7,8 QCT79_8H,7,8<
+
+//Envio de dados numéricos
+>SUC02 QUV00,9,200 QTB020,8,40<
+
+//03 - Reservada
+>SUC03U<
+
+//Fim de Operação
+//                 H_MOV    T_MOT_GIR    T_MOV        T_MAR_LEN    T_FX_VD      T_IN01       T_IN02
+>SUC04 QUV00,9,200 QIM,4,12 QCT39_1D,7,5 QCT40_1D,7,5 QCT41_1D,7,5 QCT42_1D,7,5 QCT43_1D,7,5 QCT44_1D,7,5<
+
+
+//05 - Reservada
+>SUC05U<
+
+//06 - Reservada
+>SUC06U<
+
+//07 - Reservada
+>SUC07U<
+
+//08 - Reservada
+>SUC08U<
+
+//09 - Reservada
+>SUC09U<
+
+//10 - Envio de Configuração - CTs
+>SUC10 QCT96,7,10 QCT16,7,10 QCT04,7,10 QCT05,7,10 QCT06,7,10 QCT07,7,10 QCT08,7,10 QCT09,7,10 QCT11,7,10 QCT12,7,10 QCT13,7,10<
+
+//11 - Envio de Configuração - Faixas de RPM e Entradas digitais
+>SUC11 QPP,24,4 QUT11,19,10 QUT12,19,11 QUT13,19,11 QUT14,19,11 QUT15,19,11 QUT16,19,8 QIT00,4,13 QIT01,4,13<
+
+//12 - Envio de Configuração - FW, Versionamento HW, serial HW, BaudrateCAN, Mode CAN, IMEI, Num. SIMCARD, Versão Scripts
+>SUC12 QVR,30,10 QVR,24,5 QSN,4,8 VQ29_ENA,6,9 QEN11,7,15 QEN12,7,20 QTP00,7,20 QTP01,7,20 QTP02,7,20 QTP03,7,20<
+
+//13 - Reservada tablet
+>SUC13U<
+
+//14 - Reservada
+>SUC14U<
+
+//15 - Reservada
+>SUC15U<
+
+//--------------------------------------------------------------------------
+
+//****************************************
+//*    		Grupos de Alarmes			 *
+//****************************************
+
+//Limpa a variavel de alarmes
+>SCT88 0<
+
+//Memoria Reservada para arquivos MP3
+//MP3 = 200K * 16 = 3 MBytes
+>VSRM12,0,8192,208383<
+
+//Configurar RM12 para áudio
+//onde: 9 volume do áudio, RM12 definido para áudio
+>TCFG04,912<
+
+//Alarmes - CT88 entre 1 e 2147483647
+>SUT49,QCT88,7,10,1,2147483647<
+>SED209 TT00++ UC49++ SGN NN {SCT88 |VCT16&2147483648}{SCT92 VCT88}<
+>SED210 TT00++ UC49++&&CL37++ SGN NN {STB100 QCT88_8H,7,8}{PFL,%QTB100,8,8,1,8}{SCT88 0}{SCC37 6}<
+
+//--------------------------------------------------------------------------
+
+//****************************************
+//*           Ignição 		             *
+//*	  	Início de Operação				 *
+//****************************************
+
+//Configuração do Debounce da ignição (3 segundos tolerância ao ligar e 3segundos ao desligar)
+>SIT07040005_INV0<
+
+//Evento Inicio de Operação
+>SED21 TT00++ IN07++&&SG00-- GF0 V0 {SCT3944 0}{CIM}{CDM}{SCT88 VCT16&256}{SCT18 +1}{SSH001}{SSO}<
+
+//Veículo foi desligado
+>SED25 IN07-- SG00++ GF0 V4 {SCT64 0}{SCT27 0}{SSH000}{SSO}<
+
+//Garante que o valor enviado de velocidade e RPM quando a ignição estiver desligada seja zero.
+>SED29 TT00++ IN07-- SGN NN {SCT64 0}{SCT27 0}{SCT7576 0}<
+
+//--------------------------------------------------------------------------
+
+//*********************
+//*  Tracking IGN ON  *
+//*********************
+
+//Tracking Ign ON - Configuracao Timer 02 para envio a cada
+//30segundos e 1KM, o que ocorrer depois, ou no máximo a cada 5 minutos
+>STD0200300000001K005M<
+
+//Tracking Ign ON - Evento de envio da mensagem 0 com ignição ligada.
+>SED00 TD02++ IN07++ GF0 V0 {CTD02}{CTD03}<
+
+//--------------------------------------------------------------------------
+
+//*********************
+//*  Tracking IGN OFF *
+//*********************
+
+//Tracking Ign ON - Configuracao Timer - Configuracao Timer 03 para envio a cada 30 minutos
+>STD031800<
+
+//Tracking Ign ON - Evento de envio da mensagem 0 com ignição desligada.
+>SED01 LP03++ +- GF0 V0<
+
+//--------------------------------------------------------------------------
+
+//*****************************
+//*  Tracking Power On/Off    *
+///****************************
+
+//Tracking Reset Power Off - Ocorre quando a alimentação principal é desligada
+>SED06 IN06-- +- GF0 V0 {SCC58 20}<
+
+//Tracking Reset Power On - Ocorre quando a alimentação principal é ligada
+>SED07 IN06++ +- GF0 V0 {SCC58 20}<
+
+//--------------------------------------------------------------------------
+
+//*********************
+//*  Tracking Angulo  *
+//*********************
+
+//Tracking Angulo - Configuracao Angulo (Trecho Urbano- Variação de Angulo de 45º e Vel > 5 Km/h)
+>STD050005000300450005<
+
+//Tracking Angulo - Configuracao Angulo (Trecho Rodoviário - Variação de Angulo de 20º e Vel > 60 Km/h)
+>STD060010000300200060<
+
+//Tracking Angulo - Configuracao Angulo (Trecho Rodoviário - Variação de Angulo de 10º e Vel > 100 Km/h)
+>STD070010000300100100<
+
+//Tracking Angulo - Evento
+>SED03 TD05++||TD06++||TD07++ IN07++ GF0 V0 {CTD05}{CTD06}{CTD07}{CTD02}<
+
+//--------------------------------------------------------------------------
+
+//***************
+//*  Horímetro  *
+//***************
+
+//Motor Girando
+>SUT10,QCT27,7,5,400,9999<
+
+//Incremento de Horimetro
+>SED119 TT00++ UC10++ SGN NN {SCT02 +1}<
+
+//Incremento de tempo de motor girando
+>SED129 TT00++ UC10++ SGN NN {SCT39 +1}<
+
+//Horímetro (em segundos)
+>SCT02 0<
+
+//----------------------------------------------------------------------------
+
+//***************************
+//*  	 Tempo Mvto         *
+//***************************
+
+//Tempo de Movimento
+>SGS00003255<
+>SED130 TT00++ GS00++ SGN NN {SCT40 +1}<
+
+//--------------------------------------------------------------------------
+
+//********************
+//*   Faixas RPM     *
+//********************
+
+//RPM Marcha Lenta
+>SUT11,QCT27,7,15,400,1100<
+>SED131 TT00++ UC11++ SGN NN {SCT41 +1}<
+
+//RPM Faixa Verde
+>SUT12,QCT27,7,15,1200,4000<
+>SED132 TT00++ UC12++ SGN NN {SCT42 +1}<
+
+//RPM Excesso
+>SUT13,QCT27,7,15,5500,9999<
+
+//RPM Faixa Verde Ext. (Freio Motor)
+>SUT14,QCT27,7,15,9999,9999<
+
+//RPM Ex. RPM Evento (Freio Motor)
+>SUT15,QCT27,7,15,9999,9999<
+
+//----------------------------------------------------------------------------
+
+//**********************************
+//*  Rotação de Troca de Marcha    *
+//**********************************
+
+//Configura a troca de Marcha
+>SUT16,QCT27,7,15,0000,9999<
+
+//Evento de Troca de Marcha
+>SED134 UC16-- IN07++ SGN NN {SCT88 VCT16&16}<
+
+//--------------------------------------------------------------------------
+
+//***************************************
+//*  Tempo Entradas Digitais Acionadas  *
+//***************************************
+
+//_INV0 -> Indica que a entrada está LIGADA quando conectada ao V_BAT ou flutuando
+//_INV1 -> Indica que a entrada está LIGADA quando conectada ao GND
+
+//Entrada Digital 1 (Discreta 2)
+>SIT01003003_INV1<
+>SED135 TT00++ IN01++ SGN NN {SCT43 +1}<
+
+//Entrada Digital 2 (Discreta 3)
+>SIT02003003_INV1<
+>SED136 TT00++ IN02++ SGN NN {SCT44 +1}<
+
+//Limpa Variaveis
+>SCT4344 0<
+
+//--------------------------------------------------------------------------
+
+//************************
+//*	 Discretas Virtuais  *
+//************************
+
+//Prepara os dados para Discreta Virtual 1 a 4
+//CT78 D1D2D3D4
+//D1 (CT80) = SCT78 |VCT80&HFF*16777216 (Limpador)
+//D2 (CT81) = SCT78 |VCT81&HFF*65536    (Freio)
+//D3 (CT82) = SCT78 |VCT82&HFF*256		(Farol)
+//D4 (CT83) = SCT78 |VCT83&HFF			(Cinto)
+//Caso não tenha a discreta substituir por SCT78 |FF*x, onde x é correspondente a discreta
+>SED10 TT00++ +- SGN NN {SCT78 HFFFFFFFF}<
+>SED11U<
+
+//Prepara os dados para Discreta Virtual 5 a 8
+//CT79 D5D6D7D8
+//D1 (CT84) = SCT79 |VCT84&HFF*16777216
+//D2 (CT85) = SCT79 |VCT85&HFF*65536
+//D3 (CT86) = SCT79 |VCT86&HFF*256
+//D4 (CT87) = SCT79 |VCT87&HFF
+//Caso não tenha a discreta substituir por SCT79 |FF*x, onde x é correspondente a discreta
+>SED12 TT00++ +- SGN NN {SCT79 HFFFFFFFF}<
+>SED13U<
+
+//--------------------------------------------------------------------------
+
+//****************************************
+//*	Função: Infração Excesso RPM (UC13)  *
+//****************************************
+
+//Captura Limite de RPM
+>SUT17,QUT13,C2B,1,5,0,0<
+
+//Início da Infração
+>SED32 CL07++ UC13++&&SG05-- GF0 V0 {SCT65 RUT17}{SCT6667 0}{SSH051}<
+
+//Fim da Infração
+>SED33 TT00++ UC13--&&SG05++ GF0 V2 {STB020 QCT65,8,4 QCT66,9,3 QCT67,8,4}{SSH050}<
+
+//Tolerancia para excesso de infração de RPM (Devido ao Freio Motor)
+>SED144 UC13++ CL07++&&SG05-- SGN NN {SCC07 4}<
+
+//Armazena os dados da Infração de RPM: Incrementa Duração, captura e alarme
+>SED145 TT00++ SG05++ SGN NN {SCT88 VCT16&4194304}<
+
+//Armazena os dados da Infração de RPM: RPM_Max e velocidade Atual
+>SED146 TT00++ SG05++ SGN NN {GGRVCT27VCT67}{SCT67 VCT27}{SCT66 VCT64/1000}<
+
+//Limpa variaveis utilizadas
+>SCT6567 0<
+
+//Limpa Flag utilizada
+>SSH050<
+
+//--------------------------------------------------------------------------
+
+//*******************************
+//*    Parada com Motor Ligado  *
+//*******************************
+
+//Tempo da Parada com Motor Ligado
+>SCT04 600<
+
+//Trigger para indicar que o veículo está parado
+>SUT03,QCT64,7,15,0,2999<
+
+//Envia a mensagem de início de parada com motor ligado (Somente após estourar o tempo)
+>SED36 SG04++ +- GF0 V0<
+
+//Fim da Infração
+>SED37 TT00++ UC10--||UC03--&&SG04++ GF0 V2 {STB020 QCT04,7,10}{SSH040}<
+
+//Alarme/rearme do tempo e contagem do tempo
+>SED147 CC08-- UC10++&&UC03++ SGN NN {SCT88 VCT16&1}{SCC08 VCT04}{SSH041}<
+
+//Inicio da Infração (Está com motor ligado)
+>SED148 TT00++ UC10++&&UC03++&&CL08++ SGN NN {SCC08 VCT04}{SSH040}<
+
+//Proteção caso não ocorra a infração
+>SED149 TT00++ UC10--||UC03--&&SG04-- SGN NN {SCC08 0}<
+
+//Limpa as Flags
+>SSH040<
+
+//--------------------------------------------------------------------------
+
+//************************************
+//*  UT - Tratamento Cercas Região 1 *
+//************************************
+
+//Captura o Limite de Velocidade da cerca
+>SUT31,GBALLL01,17,3,0,0<
+
+//Captura o Limite de Velocidade com Evento
+>SUT32,GBALLL01,20,3,0,0<
+
+//Captura o ID da cerca
+>SUT33,GBALLL01,23,6,0,0<
+
+//Captura o Id da cerca anterior para comparar com o Id da cerca atual.
+>SUT34,QCT77,07,06,0,0<
+
+//Verifica se a cerca atual é diferente da anterior. Se for diferente retorna 0.
+>SUT35,QCT77,07,06,UT33,UT33<
+
+
+//**********************************
+//*  Tratamento Cercas Região 1    *
+//**********************************
+
+//Evento de entrada na cerca, procura no banco de cercas
+>SED81 RR01++ UC03-- GF0 V2 {SCT77 RUT33}{STB020 PLN0,4,1 QCT77,7,6}{SCC40 3}<
+
+//Evento de saída da cerca - Restaura limites de velocidade
+>SED82 RR01-- UC03-- GF0 V2 {STB020 QCT77,7,6 PLN0,4,1}{SCT77 0}{SCC40 3}<
+
+//Trocou de cerca. Armazena ID da cerca atual
+>SED83 TT00++ UC03--&&RR01++&&UC35-- GF0 V2 {STB020 QCT77,7,6 QUT33,28,6}{SCT77 RUT33}{SCC40 3}<
+
+//Tolerancia para retornar os limites de velocidade padrões
+>SED84 CL40++ +- SGN NN {SSH201}<
+
+//---------------------------------------------------------------------
+
+//**********************************
+//*  Troca Limite de Velocidade    *
+//**********************************
+
+//** Limite de velocidade fora de cerca  **
+//Caso foi solicitado uma troca de limite de velocidade (SG20++),
+//Verifica se está fora de uma cerca (RR01--)
+//Sempre irá adotar este limite quando estiver fora da cerca
+>SED185 SG20++ +- SGN NN {SCT10 VCT11}{SSH211}{SCT88 VCT16&8}<
+
+//** Limite de velocidade dentro de cerca  **
+//Caso foi solicitado uma troca de limite de velocidade (SG20++),
+//Verifica se está fora de uma cerca (RR01++)
+//Sempre irá adotar este limite quando estiver dentro da cerca
+>SED186 SG20++ RR01++&&GM14++ SGN NN {SCT10 RUT31*1000+999}{SSH211}{SCT88 VCT16&2}<
+
+//** Limite de velocidade em chuva fora de cerca  **
+//Caso foi solicitado uma troca de limite de velocidade (SG20++),
+//Verifica se está fora de uma cerca (RR01--), e se está chovendo (SG12++&&SG22)
+//Sempre irá adotar este limite quando estiver fora da cerca com chuva
+>SED187 SG20++ SG12++&&SG22++&&RR01-- SGN NN {SCT10 VCT12}{SSH211}{SCT88 VCT16&4}<
+
+//** Limite de velocidade em chuva dentro de cerca  **
+//Caso foi solicitado uma troca de limite de velocidade (SG20++),
+//Verifica se está dentro de uma cerca (RR01++, e se está chovendo (SG12++&&SG22)
+//Sempre irá adotar este limite quando estiver dentro da cerca com chuva
+>SED188 SG20++ SG12++&&SG22++&&RR01++&&GM14++ SGN NN {SCT10 RUT32*1000+999}{SSH211}{SCT88 VCT16&2}<
+
+//Limpa Flag SH20
+>SED190 TT00++ SG20++ SGN NN {SSH200}<
+
+//-----------------------------------------------------------------------
+
+//**********************************
+//*  Uso do Limpador Parabrisa     *
+//**********************************
+
+//Padrão Desabilitado
+>SSH120<
+
+//Limpador ligado na IN02 (Discreta 3)
+>SUT02,QIN,25,1,1,1<
+
+//1- se acionada a entrada em condição de chuva inicia contagem.
+//2- "CL21++" evita o recarregamento do contador, caso acione - desacione e acione dentro do debounce.
+>SED70 UC02++ SG12++&&CL21++&&SG22-- SGN NN {SCC21 30}<
+
+//1- se desacionada a entrada já em condição de chuva inicia contagem.
+//2- Para a saída o recarregamento do contador é instantaneo.
+>SED71 TT00++ SG12++&&UC02++ SGN NN {SCC22 15}<
+
+//fim da contagem e entrada ativada
+//envia inicio de operacão em chuva.
+>SED72 CC21-- UC02++ GF0 V0 {SSH201}{SSH221}<
+
+//fim da contagem e entrada desativada
+//envia fim de operacão em chuva.
+>SED73 TT00++ CL22++&&UC02--&&SG22++ GF0 V0 {SSH201}{SSH220}<
+
+//Habilita/Desabilita uso de limpador
+>SED74 SG12+- +- SGN NN {SSH201}{SSH220}<
+
+//Proteção zera tolerancia
+>SED75 UC02-- SG22-- SGN NN {SCC21 0}<
+
+>SSH220<
+>SSH200<
+
+//--------------------------------------------------------------------------
+
+//*******************************
+//*    Excesso Velocidade       *
+//*******************************
+
+//Limpa Flags de fim de tolerancia
+>SSH020<
+
+//Previsao para Flag de troca de limite de velocidade
+>SSH200<
+
+//Tolerancia Limite de Velocidade (10segundos)
+>SCT06 10<
+
+//Limite de Velocidade
+>SCT11 80900<
+
+//Limite de Velocidade Tempo Chuva
+>SCT12 60900<
+
+//Limite de Velocidade com Evento
+>SCT13 80900<
+
+//Limite de Velocidade Corrente
+>SCT10 VCT11<
+
+//Trigger para o Excesso de Velocidade
+//(UC01-- indica fora da faixa de velocidade)
+>SUT00,QCT10,7,10,0,0<
+>SUT01,QCT64,7,15,0,UT00<
+
+//Fim da Tolerancia e ainda está em excesso - Envia mensagem de inicio
+>SED30 CC06-- UC01-- GF0 V0 {SCT60 RUT00}{SCT63 VCT77}{SSH021}{SSH200}<
+
+//Fim da Infração
+>SED31 TT00++ UC01++||SG21++&&SG02++ GF0 V2 {STB020 QCT60_6D,7,3 QCT61,9,3 QCT62,8,4 QCT63,7,6}{SSH020}<
+
+//Início da Infração, dispara Tolerancia
+>SED140 TT00++ CL06++&&UC01--&&SG02-- SGN NN {SCT6063 0}{SCC06 VCT06}{SSH210}<
+
+//Armazena os dados da Infração de Velocidade: Captura a velocidade e Dispara Alarme
+>SED141 TT00++ UC01-- SGN NN {SCT88 VCT16&2097152}<
+>SED142 TT00++ UC01-- SGN NN {SCT50 VCT64/1000}{GGRVCT50VCT61}{SCT61 VCT50}{SCT62 VCT27}<
+
+//Quando dentro do limite de velocidade zera tolerancia
+>SED143 UC01++ +- SGN NN {SCC06 0}<
+
+//--------------------------------------------------------------------------
+
+//****************************************
+//*  Cálculo da variação de velocidade   *
+//****************************************
+
+>SED206 TT00++ IN07++ SGN NN {SCT76 VCT64-VCT75/1000}{SCT75 VCT64}<
+
+//----------------------------------------------------------------------------
+
+//**********************************
+//*		Desaceleração			   *
+//**********************************
+
+//Limite de Freada Brusca (Para salvar um valor negativo)
+>SCT08 0-15<
+
+//Captura do limite e trigger de Freada Brusca
+>SUT18,QCT08,7,10,-150,-4<
+>SUT20,QCT76,7,10,-150,UT18<
+
+//Infração de Desaceleração
+//Dados: Limite, Desaceleração registrada
+>SED207 UC20++ UC18++&&IN07++ GF0 V2 {STB020 GVD0-VCT08,19,3 GVD0-RUT20,19,3}{SCT88 VCT16&4096}<
+
+//--------------------------------------------------------------------------
+
+//******************************
+//*		Aceleração			   *
+//******************************
+
+//Limite de Aceleração Brusca
+>SCT09 15<
+
+//Trigger de Aceleração Brusca
+>SUT19,QCT09,7,10,4,150<
+>SUT21,QCT76,7,10,UT19,150<
+
+//Infração de Aceleração
+//Dados: Limite, Aceleração registrada
+>SED208 UC21++ UC19++&&IN07++ GF0 V2 {STB020 QCT09,9,3 GVDRUT21,17,3}{SCT88 VCT16&8192}<
+
+//--------------------------------------------------------------------------
+
+//**********************************
+//*  Identificação de Motorista    *
+//**********************************
+
+//Padarão Desabilitado
+>SSH110<
+>VSLP_MF0<
+
+//Garante que terá alguma coisa no buffer
+>SED100 IN07+- SG11-- SGN NN {STB000 PLN000000000000,4,12}<
+
+//--------------------------------------------------------------------------
+
+//************************************
+//* Controle de Fadiga de Motorista  *
+//************************************
+
+//Padrão Desabilitado
+>SSH150<
+
+//Valores iniciais
+//TMC = 2,5h    =  9000  seg (CT14)
+//TT  = 30 min  =  1800  seg (CT15)
+//TD  = 10 min  =  600   seg (CT17)
+
+//TMC - Tempo Máximo de Condução
+>SCT14 9000<
+
+//TT - Tempo de tolerancia para parar antes de gerar infração
+>SCT15 1800<
+
+//TD - Tempo de Descanso parada Obrigatoria
+>SCT17 600<
+
+//Velocidade mínima para considerar veículo parado
+>SUT06,QCT64,7,15,0,40999<
+
+//Fim da Tolerancia - Envia mensagem de Inicio da infração
+//Infração de condução Ininterrupta em ocorrencia Flag 31 em 1
+>SED115 CC45-- UC06--&&SG31-- GF0 V0 {SSH311}<
+
+//Fim da Infração - Tempo de condução Ininterrupta excedido
+>SED116 CC47-- SG31++ GF0 V2 {STB020 QCT14,7,10 QCT15,7,10 QCT17,7,10 QCT35,71,0}<
+
+//Limpeza das variáveis
+>SED150 CC47-- SG31++ SGN NN {SCT3538 0}{SSH290}{SSH300}{SSH310}{SCC45 0}<
+
+//Armazena os dados da infração: Duração [CT35].
+>SED151 TT00++ UC06--&&SG15++ SGN NN {SCT35 +1}{SCC47 0}<
+
+//Dispara tolerancia TT [CT15] quando cTMC [CT35] atingir o TMC [CT14]) e habilita Alarme [SG30++]
+>SED152 TT00++ UC06--&&SG30--&&SG15++ SGN NN {GGRVCT35VCT14}{SCC45 VCT15}{SSH301}<
+
+//Alarme de condução ininterrupta (Está com movimento)
+//Emitir 3 bips curtos espaçados de 300 seg [CC46] após atingir TMC
+>SED153 TT00++ UC06--&&SG30++&&CL46++ SGN NN {SCT88 VCT16&32}{SCC46 300}<
+
+//Condição inicial de cTMC[CT35] > zero[CT37]
+>SCT37 0<
+
+//Quando cessar o movimento do veiculo, se cumpre a
+//Condição de cTMC[CT35] > zero[CT37] Habilita a Flag 29 em 1
+>SED155 TT00++ UC06--&&SG15++ SGN NN {GGRVCT35VCT37}{SSH291}<
+
+//Quando cessar o movimento do veiculo, inicia-se a contagem cTD [CT36]
+>SED156 TT00++ UC06++&&SG29++ SGN NN {SCT36 +1}<
+
+//Quando cesar o movimento do veiculo, inicia-se a contagem TD [CT17]
+//O valor do CT17 é carregado no CC47
+//O valor do CC45 é armazenado no CT38
+>SED154 UC06++ SG15++ SGN NN {SCC47 VCT17}{SCT38 VCC45}{SCC46 0}<
+
+//Proteção para não deixar acontecer a infração quando o veiculo estiver
+//sem movimento
+>SED157 TT00++ UC06++&&CL45--&&SG15++ SGN NN {SCC45 VCT38}<
+
+//Se o veiculo reiniciar o movimento e cTD [CT36] ainda não atingiu TD [CT17]
+//CT17>VCT36, recomeca os beeps.
+//Soma tempo parado ao tempo da infração.
+//Continua a contagem do TT [CC45]
+>SED158 UC06-- SG15++ SGN NN {GGRVCT17VCT36}{SCT35 +VCT36}{SCT36 0}{SCC45 VCT38}<
+
+//Quando cTD [CC47] atingir TD [CT13]- em condição: sem infração
+//zera os contadores cTMC [CT35], cTD[CT36], cTT[CC45] e CT38 e flags [29 e 30]
+>SED159 CC47-- SG31-- SGN NN {SCT3538 0}{SSH290}{SSH300}{SCC45 0}<
+
+//--------------------------------------------------------------------------
+
+//***************************
+//*  Envio da configuração	*
+//***************************
+
+//Envia to dia às 01hs ou 02hs horário de verão
+>STR15 040000<
+
+>SED180 TR15++ +- SGN NN {SCC58 5}<
+>SED181 CL58++ +- GF0 AX {QUV00,9,3 QUV10,9,120 QCT14,7,10 QCT15,7,10 QCT17,7,10}<
+>SED182 CL58++ +- GF0 AX {QUV00,9,3 QUV11,9,200 QIT02,4,13 QIT03,4,13 QIT07,4,13}<
+>SED183 CL58++ +- GF0 AX {QUV00,9,3 QUV12,9,180}<
+
+//--------------------------------------------------------------------------
+
+//***********
+//* Logger	*
+//***********
+
+>SED93 TT00++ IN07++||UC15++ SGN NN {SCC15 120}<
+
+//Em caso de falha de RAM, posiona o ponteiro de logger na última posição
+>SED94 RT63++ +- SGN NN {QDLS311229235959}<
+
+//Armazena Versao,Vel, RPM
+>SED95 TT00++ CL15-- LOG AX {PLN03,4,2 QCT64_6D,7,3 QCT27_6D,9,3}<
+
+//Armazena Discreta Virtual 1
+>SED96 TT00++ CL15-- LOG AX {QCT78_8H,7,8}<
+
+//Armazena Discreta Virtual 2
+>SED97 TT00++ CL15-- LOG AX {QCT79_8H,7,8}<
+
+//Armazena GP
+>SED98 TT00++ CL15-- LOG GP<
+
+//Armazena Hodometro
+>SED99 TT00++ CL15-- LOG AX {QCT01,7,10}<
+
+//--------------------------------------------------------------------------
+
+//***************
+//* Modo Sleep	*
+//***************
+
+//90 segundos antes de entrar em modo sleep, envia uma mensagem com as tensões das baterias externa e interna
+>SED15 LP01++ +- GF0 V0<
+
+//Ao acordar do modo sleep, envia uma mensagem com as tensões das baterias externa e interna
+//Reconfigura o modo sleep para ficar somente 120s acordado
+>SED01 LP03++ +- GF0 V0<
+
+//Configuras Modo sleep
+//Dorme, desligando todos os periféricos, 10 min após desligar ignição.
+//Fica dormindo por 1800 segundos ou até ligar a ignição.
+>VSKO0600060000900120_INS1_CAN1_EVP1800<
+
+//--------------------------------------------------------------------------
+
+//*******************
+//*  Versionamento  *
+//*******************
+
+>STP00 V221007_S8<
+>STP01 -<
+>STP02 -<
+>STP03 -<
+
+//--------------------------------------------------------------------------
+
+//Precisa enviar os alarmes ativos no fim para garantir que não serão
+//alterados.
+>SCT16 768<
+
+//Salva parametros
+>SSO<
+

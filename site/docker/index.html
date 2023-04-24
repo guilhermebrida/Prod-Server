@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Docker - App Produção</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Docker";
+        var mkdocs_page_input_path = "docker.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> App Produção
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Autoconfiguração dos Copilotos</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../XVM/">XVM</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../banco/">Banco de Dados</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Docker</a>
+    <ul class="current">
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../udp-server/">UDP server</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">App Produção</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+      <li>Docker</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="docker">Docker</h1>
+<h1 id="dockerfile">Dockerfile</h1>
+<h3 id="define-a-imagem-base-imagem-do-python">Define a imagem base, imagem do python</h3>
+<pre><code class="language-docker">FROM python:3.9-slim-buster
+</code></pre>
+<h3 id="instala-dependencias-necesarias">Instala dependências necesárias</h3>
+<pre><code class="language-docker">RUN apt-get update &amp;&amp; apt-get install -y libpq-dev python3-tk net-tools lsof &amp;&amp; rm -rf /var/lib/apt/lists/* 
+</code></pre>
+<h3 id="define-a-variavel-de-ambiente-para-o-diretorio-de-trabalho">Define a variável de ambiente para o diretório de trabalho</h3>
+<pre><code class="language-docker">ENV APP_HOME /app
+WORKDIR $APP_HOME
+</code></pre>
+<h3 id="copia-o-requirementstxt-e-instala-as-dependencias">Copia o requirements.txt e instala as dependências</h3>
+<pre><code class="language-docker">COPY ./app/requirements.txt .
+COPY ./app/udp-server.py .
+COPY ./app/XVM.py .
+RUN pip install --no-cache-dir -r requirements.txt
+</code></pre>
+<h3 id="copia-o-codigo-fonte">Copia o código fonte</h3>
+<pre><code class="language-docker">COPY . .
+</code></pre>
+<h3 id="define-as-variaveis-de-ambiente-para-o-banco-de-dados">Define as variáveis de ambiente para o banco de dados</h3>
+<pre><code class="language-docker">ENV POSTGRES_HOST=postgres
+ENV POSTGRES_PORT=5432
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_PASSWORD=postgres
+ENV POSTGRES_DB=postgres
+</code></pre>
+<h3 id="executa-a-aplicacao">Executa a aplicação</h3>
+<pre><code class="language-docker">CMD [&quot;python&quot;, &quot;-u&quot;,&quot;./app/udp-server.py&quot;]
+</code></pre>
+<h1 id="docker-compose">Docker compose</h1>
+<h2 id="services">Services</h2>
+<h3 id="app">App</h3>
+<ul>
+<li>build: .: Configura a imagem do serviço a partir do Dockerfile localizado no diretório atual.</li>
+<li>restart: unless-stopped: Essa opção instrui o Docker a reiniciar o serviço automaticamente caso ele seja encerrado, a menos que seja explicitamente parado pelo usuário.</li>
+<li>ports: - "10116:10117/udp": Configura o mapeamento de porta do serviço. Neste exemplo, a porta 10117 do container é mapeada para a porta 10116 do host, usando o protocolo UDP.</li>
+<li>depends_on: - postgres: Configura a dependência do serviço em relação a outro serviço chamado postgres. Isso significa que o serviço atual só será iniciado após a inicialização do serviço postgres.</li>
+<li>environment: - ENDPOINT=postgres: Configura uma variável de ambiente chamada ENDPOINT para o valor postgres.</li>
+<li>links: - postgres: Configura o link para o serviço postgres, permitindo que o serviço atual se conecte ao serviço postgres.</li>
+<li>networks: - backing-services: Configura a rede a ser usada pelo serviço. Neste exemplo, o serviço está configurado para usar a rede chamada backing-services.</li>
+</ul>
+<pre><code class="language-docker">  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - &quot;10116:10117/udp&quot;
+      # - &quot;65117:10117/udp&quot;
+    depends_on:
+      - postgres
+    environment:
+      - ENDPOINT=postgres
+    links:
+      - postgres
+    networks:
+      - backing-services
+</code></pre>
+<h3 id="postgres">Postgres</h3>
+<ul>
+<li>
+<p>image: postgres:14-alpine3.15: Configura a imagem do serviço a ser usada a partir do Docker Hub. Neste exemplo, é usada a imagem postgres:14-alpine3.15, que é uma versão leve do Postgres baseada no Alpine Linux.</p>
+</li>
+<li>
+<p>ports: ["5432:5432"]: Configura o mapeamento de porta do serviço. Neste exemplo, a porta 5432 do container é mapeada para a porta 5432 do host.</p>
+</li>
+<li>
+<p>restart: always: Configura o comportamento do Docker em relação à reinicialização do serviço. Essa opção instrui o Docker a reiniciar o serviço automaticamente caso ele seja encerrado por algum motivo.</p>
+</li>
+<li>
+<p>networks: [backing-services]: Configura a rede a ser usada pelo serviço. Neste exemplo, o serviço está configurado para usar a rede chamada backing-services.</p>
+</li>
+<li>
+<p>volumes: - Configura os volumes a serem montados no container do serviço. Neste exemplo, o primeiro volume mapeia o diretório ./app do host para o diretório /data do container. O segundo volume mapeia o arquivo /mnt/c/Python_scripts/Docker-app/docker-app/Docker_python/db/init.sql do host para o diretório /docker-entrypoint-initdb.d/init.sql do container. Isso permite que o arquivo SQL seja executado na inicialização do banco de dados.</p>
+</li>
+<li>
+<p>environment: POSTGRES_DB: postgres POSTGRES_USER: postgres POSTGRES_PASSWORD: postgres: Configura as variáveis de ambiente usadas pelo serviço Postgres. indicando o nome do banco de dados, usuário e senha a serem usados. </p>
+</li>
+</ul>
+<pre><code class="language-docker">  postgres: 
+    image: postgres:14-alpine3.15
+    ports: [&quot;5432:5432&quot;]
+    restart: always
+    networks: [backing-services] 
+    volumes:
+      - ./app:/data
+      - /mnt/c/Python_scripts/Docker-app/docker-app/Docker_python/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    # hostname: &quot;ec2-3-85-175-98.compute-1.amazonaws.com&quot;
+</code></pre>
+<h3 id="socat">Socat</h3>
+<ul>
+<li>
+<p>image: alpine/socat: Configura a imagem do serviço a ser usada a partir do Docker Hub. Neste exemplo, é usada a imagem alpine/socat, que é uma imagem Alpine do Socat.</p>
+</li>
+<li>
+<p>command: socat TCP4-LISTEN:10116,fork,reuseaddr TCP4:127.0.0.1:10117: Configura o comando a ser executado quando o contêiner for iniciado. Neste exemplo, o comando socat é usado para direcionar o tráfego de entrada na porta 10116 para a porta 10117 no endereço IP 127.0.0.1. As opções fork e reuseaddr são usadas para permitir que várias conexões sejam gerenciadas e para reutilizar o endereço IP e a porta.</p>
+</li>
+</ul>
+<pre><code class="language-docker">  socat:
+    image: alpine/socat
+    command: socat TCP4-LISTEN:10116,fork,reuseaddr TCP4:127.0.0.1:10117
+    # command: socat TCP4-LISTEN:65117,fork,reuseaddr TCP4:127.0.0.1:10117
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../banco/" class="btn btn-neutral float-left" title="Banco de Dados"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../udp-server/" class="btn btn-neutral float-right" title="UDP server">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../banco/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../udp-server/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
