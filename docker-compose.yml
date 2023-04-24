@@ -7,8 +7,8 @@ services:
     restart: unless-stopped
     ports:
       # - "10116:5000"
-      # - "10116:10117/udp"
-      - "65117:10117/udp"
+      - "10116:10117/udp"
+      # - "65117:10117/udp"
     depends_on:
       - postgres
     environment:
@@ -43,8 +43,8 @@ services:
 
   socat:
     image: alpine/socat
-    # command: socat TCP4-LISTEN:10116,fork,reuseaddr TCP4:127.0.0.1:10117
-    command: socat TCP4-LISTEN:65117,fork,reuseaddr TCP4:127.0.0.1:10117
+    command: socat TCP4-LISTEN:10116,fork,reuseaddr TCP4:127.0.0.1:10117
+    # command: socat TCP4-LISTEN:65117,fork,reuseaddr TCP4:127.0.0.1:10117
 
 volumes:
   postgres_data:

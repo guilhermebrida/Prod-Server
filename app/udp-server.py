@@ -16,25 +16,27 @@ VOZ = []
 cabeçalho =  'BINAVSFB'
 bloc =''
 bloco =[]
-
-# Lê as variáveis de ambiente
-# postgres_host = os.environ['POSTGRES_HOST']
-# postgres_port = os.environ['POSTGRES_PORT']
-# postgres_user = os.environ['POSTGRES_USER']
-# postgres_password = os.environ['POSTGRES_PASSWORD']
-# postgres_db = os.environ['POSTGRES_DB']
+path = []
+path_voz = []
+path_script = []
+# # Lê as variáveis de ambiente
+postgres_host = os.environ['POSTGRES_HOST']
+postgres_port = os.environ['POSTGRES_PORT']
+postgres_user = os.environ['POSTGRES_USER']
+postgres_password = os.environ['POSTGRES_PASSWORD']
+postgres_db = os.environ['POSTGRES_DB']
 
 # print('HOST:{}  PORTA:{}   DB:{}  USER:{}  PASS:{} '.format(postgres_host,postgres_port,postgres_db,postgres_user,postgres_password))
 
 # Usa as variáveis de ambiente para se conectar ao banco de dados
-# connection = psycopg2.connect(
-#     # host=postgres_host,
-#     host="postgres",
-#     port=postgres_port,
-#     user=postgres_user,
-#     password=postgres_password,
-#     dbname=postgres_db
-# )
+connection = psycopg2.connect(
+    host=postgres_host,
+    # host="postgres",
+    port=postgres_port,
+    user=postgres_user,
+    password=postgres_password,
+    dbname=postgres_db
+)
 
 #CONECTA COM BANCO REAL
 # ENDPOINT="ec2-52-91-118-43.compute-1.amazonaws.com"
@@ -44,12 +46,12 @@ bloco =[]
 # DBNAME="gb"
 
 #CONECT COM LOCALHOST NA MÃO
-ENDPOINT="postgres"
+# ENDPOINT="postgres"
 # ENDPOINT="localhost"
-PORT="5432"
-USER="postgres"
-DBNAME="postgres"
-connection = psycopg2.connect(host=ENDPOINT, user=USER, password='postgres', port=PORT, database=DBNAME)
+# PORT="5432"
+# USER="postgres"
+# DBNAME="postgres"
+# connection = psycopg2.connect(host=ENDPOINT, user=USER, password='postgres', port=PORT, database=DBNAME)
 cursor = connection.cursor()
 
 
@@ -60,52 +62,56 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
         self.ids = []
 
     def datagram_received(self, data, addr):
-        # if re.search(b'RGP.*',data) is None:
-        print(data)
-        asyncio.create_task(udp().handle_request(data, addr, self.transport))
+        if re.search('BINA.*',data.decode(errors='ignore')) is None:
+            if XVM.isValidXVM(data.decode(errors='ignore')):
+                xvmMessage = XVM.parseXVM(data.decode(errors='ignore'))
+                msg = xvmMessage[0]
+                device_id = xvmMessage[1]
+                asyncio.create_task(udp().handle_request(data, addr, self.transport,device_id))
+                if device_id == '0306':
+                    print(data)
+        if re.search(b'BINA.*',data) is not None:
+            print(data)
+
         
         
 
 class udp():
-    async def handle_request(self,data, addr, transport):
+    async def handle_request(self,data, addr, transport,device_id):
         transport = transport
         self.message = data.decode(errors='ignore')
-        if re.search('BINA.*',self.message) is None:
-            if XVM.isValidXVM(self.message):
-                xvmMessage = XVM.parseXVM(self.message)
-                msg = xvmMessage[0]
-                device_id = xvmMessage[1]
-                if device_id not in ALREADY_LISTEN:
-                    xvm = XVM.generateXVM(device_id,str(8000).zfill(4),'>QSN<')
-                    print(xvm)
-                    transport.sendto(xvm.encode(), addr)
-                    result = re.search('>RSN.*',self.message)
-                    if result is not None:
-                        rsn = result.group()
-                        self.sn = rsn.split('_')[0].split('>RSN')[1]
-                        if self.sn:
-                            ALREADY_LISTEN.append(device_id)
-                            RSN_DICT[device_id]=self.sn
-                            print(RSN_DICT)
-                            await self.Arquivos(transport,self.message,addr,device_id)
-                            await self.fdir(transport,addr,device_id)
-        
-                if re.search('>.*EOF.*',self.message) is not None:
-                    fdir = re.search('>.*EOF.*',self.message)
-                    self.vozes = fdir.group().split('_')[2].split(':')[1]
-                    print('\nFDIR:',self.vozes)
+        if device_id == '0306' and not ALREADY_LISTEN and not ID:
+            xvm = XVM.generateXVM(device_id,str(8000).zfill(4),'>QSN<')
+            print(xvm)
+            transport.sendto(xvm.encode(), addr)
+            result = re.search('>RSN.*',self.message)
+            if result is not None:
+                rsn = result.group()
+                self.sn = rsn.split('_')[0].split('>RSN')[1]
+                if self.sn:
+                    ALREADY_LISTEN.append(device_id)
+                    RSN_DICT[device_id]=self.sn
                     print(RSN_DICT)
-                    print(device_id)
-                    await self.criar(device_id)
-                    print('feito')
+                    await self.envioScript(transport,addr,device_id)
+                    await self.Arquivos(transport,self.message,addr,device_id)
+                    await self.fdir(transport,addr,device_id)
+
+        if re.search('>.*EOF.*',self.message) is not None:
+            fdir = re.search('>.*EOF.*',self.message)
+            self.vozes = fdir.group().split('_')[2].split(':')[1]
+            print('\nFDIR:',self.vozes)
+            await self.criar(device_id)
+
+        
+
         
 
         
     async def Arquivos(self,transport,message,addr,device_id):
         sn = RSN_DICT[device_id]
         VOZ.append(device_id)
-        for files in path:
-            print(files)
+        print(path_voz)
+        for files in path_voz:
             f=open(f'{files}','rb')
             conteudo = f.read()
             separar = [conteudo[i:i+520]for i in range(0,len(conteudo),520)]
@@ -136,10 +142,8 @@ class udp():
     
     async def criar(self,device_id):
         try:
-            print('dict',RSN_DICT)
             sn2 = RSN_DICT[device_id]
-            sn = RSN_DICT.get(device_id, 'nao encontrado')
-            cursor.execute(f'INSERT INTO copilotos.vozes (IMEI, SN, FDIR) VALUES ("{device_id}","{sn2}","{self.vozes}");')
+            cursor.execute('INSERT INTO copilotos.vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'{}\');'.format(device_id, sn2,self.vozes))
             connection.commit()
         except:
             pass
@@ -158,6 +162,22 @@ class udp():
                 return self.vozes 
         except:
             raise Exception
+
+    async def envioScript(self,transport,addr,device_id):
+        for i in path_script:
+            print(i)
+            with open(f'{i}') as f:
+                self.tudo = f.read()
+            self.comandos=(re.findall('(>.*<)', self.tudo))
+            for i in range(len(self.comandos)):
+                try:
+                    xvm = XVM.generateXVM(device_id,str(8010+i).zfill(4),self.comandos[i])
+                    transport.sendto(xvm.encode(),addr)
+                except:
+                    raise Exception
+
+        
+
 
 async def main():
     loop = asyncio.get_running_loop()
@@ -179,9 +199,8 @@ async def main():
     finally:
         transport.close()
 
-path = []
-def find():
-    pasta = "./app/Vozes/"
+
+def find(pasta):
     arquivos = os.listdir(pasta)
     for arquivo in arquivos:
         print('puro',arquivo)
@@ -195,9 +214,27 @@ def find():
 
 if __name__ == "__main__":
     try:
-        cursor.execute('SELECT * FROM copilotos.vozes;')
-        result = cursor.fetchall()
-        print(result)
+        cursor.execute('SELECT "IMEI" FROM copilotos.vozes;')
+        results = cursor.fetchall()
+        ID = [result[0] for result in results]
+        print('Ids no banco:',ID)
+        pasta_vozes = "./app/Files/Vozes/"
+        pasta_scripts = "./app/Files/Prod_script/"
+        path_voz = find(pasta_vozes)
+        print(path_voz)
+        path = []
+        path_script = find(pasta_scripts)
+        print(path_script)
+        if path_voz:
+            asyncio.run(main())
+    except KeyboardInterrupt:
+        pass
+
+
+
+
+
+
         # path = dlg.askopenfilenames()
         # nome_arquivo = "00000001_MP3.SFB"
         # for root, dirs, files in os.walk("."):
@@ -207,11 +244,3 @@ if __name__ == "__main__":
         #         break
         # else:
         #     print("Arquivo não encontrado.")
-        path = find()
-        if path:
-            asyncio.run(main())
-    except KeyboardInterrupt:
-        pass
-
-
-
