@@ -17,24 +17,24 @@ bloco =[]
 path = []
 path_voz = []
 path_script = []
-# # Lê as variáveis de ambiente
-# postgres_host = os.environ['POSTGRES_HOST']
-# postgres_port = os.environ['POSTGRES_PORT']
-# postgres_user = os.environ['POSTGRES_USER']
-# postgres_password = os.environ['POSTGRES_PASSWORD']
-# postgres_db = os.environ['POSTGRES_DB']
+# Lê as variáveis de ambiente
+postgres_host = os.environ['POSTGRES_HOST']
+postgres_port = os.environ['POSTGRES_PORT']
+postgres_user = os.environ['POSTGRES_USER']
+postgres_password = os.environ['POSTGRES_PASSWORD']
+postgres_db = os.environ['POSTGRES_DB']
 
-# # print('HOST:{}  PORTA:{}   DB:{}  USER:{}  PASS:{} '.format(postgres_host,postgres_port,postgres_db,postgres_user,postgres_password))
+# print('HOST:{}  PORTA:{}   DB:{}  USER:{}  PASS:{} '.format(postgres_host,postgres_port,postgres_db,postgres_user,postgres_password))
 
-# # Usa as variáveis de ambiente para se conectar ao banco de dados
-# connection = psycopg2.connect(
-#     host=postgres_host,
-#     # host="postgres",
-#     port=postgres_port,
-#     user=postgres_user,
-#     password=postgres_password,
-#     dbname=postgres_db
-# )
+# Usa as variáveis de ambiente para se conectar ao banco de dados
+connection = psycopg2.connect(
+    host=postgres_host,
+    # host="postgres",
+    port=postgres_port,
+    user=postgres_user,
+    password=postgres_password,
+    dbname=postgres_db
+)
 
 #CONECTA COM BANCO REAL
 # ENDPOINT="ec2-52-91-118-43.compute-1.amazonaws.com"
@@ -45,12 +45,12 @@ path_script = []
 
 #CONECT COM LOCALHOST NA MÃO
 # ENDPOINT="postgres"
-ENDPOINT="localhost"
-PORT="5432"
-USER="postgres"
-DBNAME="postgres"
-connection = psycopg2.connect(host=ENDPOINT, user=USER, password='postgres', port=PORT, database=DBNAME)
-cursor = connection.cursor()
+# ENDPOINT="localhost"
+# PORT="5432"
+# USER="postgres"
+# DBNAME="postgres"
+# connection = psycopg2.connect(host=ENDPOINT, user=USER, password='postgres', port=PORT, database=DBNAME)
+# cursor = connection.cursor()
 
 
 
