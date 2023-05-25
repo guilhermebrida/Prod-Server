@@ -29,9 +29,9 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
 
-  socat:
-    image: alpine/socat
-    command: socat TCP4-LISTEN:10116,fork,reuseaddr TCP4:127.0.0.1:10117
+  # socat:
+  #   image: alpine/socat
+  #   command: socat TCP4-LISTEN:10116,fork,reuseaddr TCP4:127.0.0.1:10117
 
 volumes:
   postgres_data:
