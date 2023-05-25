@@ -50,9 +50,11 @@ connection = psycopg2.connect(
 # USER="postgres"
 # DBNAME="postgres"
 # connection = psycopg2.connect(host=ENDPOINT, user=USER, password='postgres', port=PORT, database=DBNAME)
-# cursor = connection.cursor()
 
 
+
+
+cursor = connection.cursor()
 
 class MyDatagramProtocol(asyncio.DatagramProtocol):
     def connection_made(self, transport):
