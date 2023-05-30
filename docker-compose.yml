@@ -33,7 +33,7 @@ services:
     image: grafana/grafana-oss:latest
     ports: ["3000:3000"]
     networks: [backing-services]
-    volumes: ["./grafana_data"]
+    volumes: ["./app:/grafana_data"]
     # hostname: "ec2-18-228-116-56.sa-east-1.compute.amazonaws.com"
 
   # socat:
