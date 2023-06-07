@@ -143,7 +143,7 @@ class udp():
     async def criar(self,device_id):
         try:
             sn2 = RSN_DICT[device_id]
-            cursor.execute('INSERT INTO copilotos.vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'{}\');'.format(device_id, sn2,self.vozes))
+            cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'{}\');'.format(device_id, sn2,self.vozes))
             connection.commit()
         except:
             pass
@@ -215,7 +215,7 @@ def find(pasta):
 
 if __name__ == "__main__":
     try:
-        cursor.execute('SELECT "IMEI" FROM copilotos.vozes;')
+        cursor.execute('SELECT "IMEI" FROM vozes;')
         results = cursor.fetchall()
         ID = [result[0] for result in results]
         print('Ids no banco:',ID)
