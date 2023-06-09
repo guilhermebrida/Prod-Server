@@ -110,7 +110,7 @@ class udp():
     async def Arquivos(self,transport,message,addr,device_id):
         sn = RSN_DICT[device_id]
         VOZ.append(device_id)
-        print(path_voz)
+        # print(path_voz)
         for files in path_voz:
             f=open(f'{files}','rb')
             conteudo = f.read()
@@ -204,10 +204,10 @@ async def main():
 def find(pasta):
     arquivos = os.listdir(pasta)
     for arquivo in arquivos:
-        print('puro',arquivo)
+        # print('puro',arquivo)
         caminho_arquivo = os.path.join(pasta, arquivo)
         if os.path.isfile(caminho_arquivo):
-            print(caminho_arquivo)
+            # print(caminho_arquivo)
             path.append(caminho_arquivo)
     return path
 
@@ -222,10 +222,10 @@ if __name__ == "__main__":
         pasta_vozes = "./app/Files/Vozes/"
         pasta_scripts = "./app/Files/Prod_script/"
         path_voz = find(pasta_vozes)
-        print(path_voz)
+        # print(path_voz)
         path = []
         path_script = find(pasta_scripts)
-        print(path_script)
+        # print(path_script)
         if path_voz:
             asyncio.run(main())
     except KeyboardInterrupt:
