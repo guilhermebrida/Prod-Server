@@ -21,3 +21,8 @@ ENV POSTGRES_DB=postgres
 
 CMD ["python", "-u","./app/udp-server.py"]
 
+
+
+
+
+

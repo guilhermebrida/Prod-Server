@@ -2,19 +2,19 @@
 version: "2.1"
 
 services:
-  app:
-    build: .
-    restart: unless-stopped
-    ports:
-      - "10116:10116/udp"
-    depends_on:
-      - postgres
-    environment:
-      - ENDPOINT=postgres
-    links:
-      - postgres
-    networks:
-      - backing-services
+  # app:
+  #   build: .
+  #   restart: unless-stopped
+  #   ports:
+  #     - "10116:10116/udp"
+  #   depends_on:
+  #     - postgres
+  #   environment:
+  #     - ENDPOINT=postgres
+  #   links:
+  #     - postgres
+  #   networks:
+  #     - backing-services
 
   postgres: 
     image: postgres:14-alpine3.15
@@ -29,14 +29,14 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
 
-  grafana:
-    image: grafana/grafana-oss:latest
-    ports: 
-      - 3000:3000
-    networks: [backing-services]
-    volumes: 
-      - grafana-data:/var/lib/grafana
-    # hostname: "ec2-18-228-116-56.sa-east-1.compute.amazonaws.com"
+  # grafana:
+  #   image: grafana/grafana-oss:latest
+  #   ports: 
+  #     - 3000:3000
+  #   networks: [backing-services]
+  #   volumes: 
+  #     - grafana-data:/var/lib/grafana
+  #   hostname: "ec2-54-233-187-9.sa-east-1.compute.amazonaws.com"
 
   # socat:
   #   image: alpine/socat
