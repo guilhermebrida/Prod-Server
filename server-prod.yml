@@ -10,8 +10,10 @@ services:
     #   - postgres
     environment:
       - ENDPOINT=postgres
-    links:
-      - postgres
+    # links:
+    #   - postgres
+    external_links:
+      - docker_python-postgres-1
     networks:
       - backing-services
 
