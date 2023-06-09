@@ -6,8 +6,8 @@ services:
     restart: unless-stopped
     ports:
       - "10116:10116/udp"
-    depends_on:
-      - postgres
+    # depends_on:
+    #   - postgres
     environment:
       - ENDPOINT=postgres
     links:
