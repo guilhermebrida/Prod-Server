@@ -1,0 +1,20 @@
+version: "2.1"
+
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "10116:10116/udp"
+    depends_on:
+      - postgres
+    environment:
+      - ENDPOINT=postgres
+    links:
+      - postgres
+    networks:
+      - backing-services
+
+networks: 
+  backing-services:
+    driver: bridge
