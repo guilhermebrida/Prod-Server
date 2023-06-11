@@ -16,27 +16,25 @@ services:
   #   networks:
   #     - backing-services
 
-  postgres: 
-    image: postgres:14-alpine3.15
-    ports: ["5432:5432"]
-    restart: always
-    networks: [backing-services] 
-    volumes:
-      - ./app:/data
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+  # postgres: 
+  #   image: postgres:14-alpine3.15
+  #   ports: ["5432:5432"]
+  #   restart: always
+  #   networks: [backing-services] 
+  #   volumes:
+  #     - ./app:/data
+  #     - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+  #   environment:
+  #     POSTGRES_DB: postgres
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
 
-  # grafana:
-  #   image: grafana/grafana-oss:latest
-  #   ports: 
-  #     - 3000:3000
-  #   networks: [backing-services]
-  #   volumes: 
-  #     - grafana-data:/var/lib/grafana
-  #   hostname: "ec2-54-233-187-9.sa-east-1.compute.amazonaws.com"
+  grafana:
+    build:
+      context: .
+      dockerfile: Dockerfile.grafana
+    ports:
+      - 3000:3000
 
   # socat:
   #   image: alpine/socat
