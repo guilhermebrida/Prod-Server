@@ -29,6 +29,7 @@ FROM ubuntu:latest
 
 # Instala as dependências necessárias
 RUN apt-get update && apt-get install -y curl && \
+    apt-get install -y libfontconfig1 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -45,6 +46,7 @@ EXPOSE 3000
 
 # Comando para iniciar o Grafana
 CMD ["grafana-server", "--config=/etc/grafana/grafana.ini"]
+
 
 
 
