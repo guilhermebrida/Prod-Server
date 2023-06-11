@@ -9,5 +9,5 @@ CREATE TABLE IF NOT EXISTS public.vozes
 INSERT INTO public.vozes ("IMEI","SN","VOZES") VALUES ('teste','teste',22);
 INSERT INTO public.vozes ("IMEI","SN","VOZES") VALUES ('teste2','teste2',25);
 INSERT INTO public.vozes ("IMEI","SN","VOZES") VALUES ('teste3','teste3',12);
-INSERT INTO public.vozes ("IMEI","SN","VOZES") VALUES ('grafana','grafana',3);
-INSERT INTO public.vozes ("IMEI","SN","VOZES") VALUES ('server','graf',19);
+INSERT INTO public.vozes ("IMEI","SN","VOZES") VALUES ('teste4','teste4',3);
+INSERT INTO public.vozes ("IMEI","SN","VOZES") VALUES ('teste5','teste5',19);
