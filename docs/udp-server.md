@@ -141,7 +141,7 @@ Sendo então os pacotes a enviar para o dispositivo compostos da seguinte forma:
     async def criar(self,device_id):
         try:
             sn = RSN_DICT[device_id]
-            cursor.execute('INSERT INTO copilotos.vozes ("IMEI", "SN", "VOZES") \
+            cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") \
                             values (\'{}\', \'{}\', \'{}\');'.format(device_id, sn,self.vozes))
             connection.commit()
         except:
@@ -169,7 +169,6 @@ Sendo então os pacotes a enviar para o dispositivo compostos da seguinte forma:
 ```python 
     async def envioScript(self,transport,addr,device_id):
         for i in path_script:
-            print(i)
             with open(f'{i}') as f:
                 self.tudo = f.read()
             self.comandos=(re.findall('(>.*<)', self.tudo))
@@ -177,6 +176,7 @@ Sendo então os pacotes a enviar para o dispositivo compostos da seguinte forma:
                 try:
                     xvm = XVM.generateXVM(device_id,str(8010+i).zfill(4),self.comandos[i])
                     transport.sendto(xvm.encode(),addr)
+                    await asyncio.sleep(0.3)
                 except:
                     raise Exception
 ```
@@ -189,10 +189,6 @@ async def main():
     loop = asyncio.get_running_loop()
     transport, protocol = await loop.create_datagram_endpoint(
         lambda: MyDatagramProtocol(),
-        # local_addr=('192.168.0.116', 65117),
-        # local_addr=('192.168.0.116', 10116),
-        # local_addr=('127.0.0.11', 10116),
-        # local_addr=('191.4.146.247', 10116),
         local_addr=('0.0.0.0', 10117),
         family=socket.AF_INET)
     print(f"Server started on {transport.get_extra_info('sockname')}")
@@ -211,10 +207,8 @@ async def main():
 def find(pasta):
     arquivos = os.listdir(pasta)
     for arquivo in arquivos:
-        print('puro',arquivo)
         caminho_arquivo = os.path.join(pasta, arquivo)
         if os.path.isfile(caminho_arquivo):
-            print(caminho_arquivo)
             path.append(caminho_arquivo)
     return path
 ```
@@ -226,17 +220,14 @@ def find(pasta):
 ```python 
 if __name__ == "__main__":
     try:
-        cursor.execute('SELECT "IMEI" FROM copilotos.vozes;')
+        cursor.execute('SELECT "IMEI" FROM vozes;')
         results = cursor.fetchall()
         ID = [result[0] for result in results]
-        print('Ids no banco:',ID)
         pasta_vozes = "./app/Files/Vozes/"
         pasta_scripts = "./app/Files/Prod_script/"
         path_voz = find(pasta_vozes)
-        print("Arquivos de Voz:",path_voz)
         path = []
         path_script = find(pasta_scripts)
-        print("Script basico:",path_script)
         if path_voz:
             asyncio.run(main())
     except KeyboardInterrupt:

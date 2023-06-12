@@ -43,32 +43,40 @@ ENV POSTGRES_DB=postgres
 CMD ["python", "-u","./app/udp-server.py"]
 ``` 
 
-# Docker compose 
-## Services
+# YAML para o Docker compose 
+
+## server-prod
 ### App
 * build: .: Configura a imagem do serviço a partir do Dockerfile localizado no diretório atual.
 * restart: unless-stopped: Essa opção instrui o Docker a reiniciar o serviço automaticamente caso ele seja encerrado, a menos que seja explicitamente parado pelo usuário.
-* ports: - "10116:10117/udp": Configura o mapeamento de porta do serviço. Neste exemplo, a porta 10117 do container é mapeada para a porta 10116 do host, usando o protocolo UDP.
+* ports: - "10116:10116/udp": Configura o mapeamento de porta do serviço. Neste exemplo, a porta 10116 do container é mapeada para a porta 10116 do host, usando o protocolo UDP.
 * depends_on: - postgres: Configura a dependência do serviço em relação a outro serviço chamado postgres. Isso significa que o serviço atual só será iniciado após a inicialização do serviço postgres.
 * environment: - ENDPOINT=postgres: Configura uma variável de ambiente chamada ENDPOINT para o valor postgres.
-* links: - postgres: Configura o link para o serviço postgres, permitindo que o serviço atual se conecte ao serviço postgres.
+* external_links: - postgres: Configura o link para o serviço postgres, permitindo que o serviço atual se conecte ao serviço postgres.
 * networks: - backing-services: Configura a rede a ser usada pelo serviço. Neste exemplo, o serviço está configurado para usar a rede chamada backing-services.
 ```docker 
+version: "2.1"
+
+services:
   app:
     build: .
     restart: unless-stopped
     ports:
-      - "10116:10117/udp"
-      # - "65117:10117/udp"
-    depends_on:
-      - postgres
+      - "10116:10116/udp"
     environment:
       - ENDPOINT=postgres
-    links:
-      - postgres
+    external_links:
+      - docker_python-postgres-1
     networks:
       - backing-services
+
+networks: 
+  backing-services:
+    driver: bridge
 ```
+
+## docker-compose
+
 ### Postgres
 * image: postgres:14-alpine3.15: Configura a imagem do serviço a ser usada a partir do Docker Hub. Neste exemplo, é usada a imagem postgres:14-alpine3.15, que é uma versão leve do Postgres baseada no Alpine Linux.
 
@@ -97,7 +105,33 @@ CMD ["python", "-u","./app/udp-server.py"]
       POSTGRES_PASSWORD: postgres
     # hostname: "ec2-3-85-175-98.compute-1.amazonaws.com"
 ```
+
+
+### Grafana
+* Image: Nome da imagem do Grafana Enterprise usada.
+
+* Container_name: Nome do contêiner em execução.
+
+* Restart: Política de reinicialização do contêiner.
+
+* Ports: Portas do host mapeadas para as portas do contêiner.
+
+* Volumes: Dados persistem entre reinicializações do contêiner.
+
+```
+  grafana:
+    image: grafana/grafana-enterprise
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    volumes:
+      - grafana_data:/var/lib/grafana
+```
+
+
 ### Socat
+#### Não utilizado na versão mais recente!!!
 * image: alpine/socat: Configura a imagem do serviço a ser usada a partir do Docker Hub. Neste exemplo, é usada a imagem alpine/socat, que é uma imagem Alpine do Socat.
 
 * command: socat TCP4-LISTEN:10116,fork,reuseaddr TCP4:127.0.0.1:10117: Configura o comando a ser executado quando o contêiner for iniciado. Neste exemplo, o comando socat é usado para direcionar o tráfego de entrada na porta 10116 para a porta 10117 no endereço IP 127.0.0.1. As opções fork e reuseaddr são usadas para permitir que várias conexões sejam gerenciadas e para reutilizar o endereço IP e a porta.
