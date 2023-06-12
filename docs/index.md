@@ -58,3 +58,21 @@
 No Grafana apenas precisa configurar o Database do Postgres, inserir o IP da maquina da AWS porta 5432, Database, user e password desta aplicação é "postgres" e marcar TLS como disable
 
 
+
+## Comandos Mkdocs
+
+Para criar nova documentação (pasta docs)
+
+```mkdocs new my-project```
+
+Iniciar o Mkdocs, visualizar a documentação no Localhost
+
+```mkdocs serve ```
+
+Buildar a documentação ao finaliza-la
+
+```mkdocs build ```
+
+Ao ter a documentação commitada em um repositório do Git, disponibilizará a documentação em um link
+
+```mkdocs gh-deploy ```
