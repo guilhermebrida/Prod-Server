@@ -35,7 +35,7 @@
           <a href=".." class="icon icon-home"> App Produção
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
   </form>
 </div>
       </div>
@@ -108,7 +108,7 @@
       <div class="wy-nav-content">
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a> &raquo;</li>
       <li>UDP server</li>
     <li class="wy-breadcrumbs-aside">
     </li>
@@ -270,7 +270,7 @@ Sendo então os pacotes a enviar para o dispositivo compostos da seguinte forma:
 <pre><code class="language-python">    async def criar(self,device_id):
         try:
             sn = RSN_DICT[device_id]
-            cursor.execute('INSERT INTO copilotos.vozes (&quot;IMEI&quot;, &quot;SN&quot;, &quot;VOZES&quot;) \
+            cursor.execute('INSERT INTO vozes (&quot;IMEI&quot;, &quot;SN&quot;, &quot;VOZES&quot;) \
                             values (\'{}\', \'{}\', \'{}\');'.format(device_id, sn,self.vozes))
             connection.commit()
         except:
@@ -300,7 +300,6 @@ Sendo então os pacotes a enviar para o dispositivo compostos da seguinte forma:
 </ul>
 <pre><code class="language-python">    async def envioScript(self,transport,addr,device_id):
         for i in path_script:
-            print(i)
             with open(f'{i}') as f:
                 self.tudo = f.read()
             self.comandos=(re.findall('(&gt;.*&lt;)', self.tudo))
@@ -308,6 +307,7 @@ Sendo então os pacotes a enviar para o dispositivo compostos da seguinte forma:
                 try:
                     xvm = XVM.generateXVM(device_id,str(8010+i).zfill(4),self.comandos[i])
                     transport.sendto(xvm.encode(),addr)
+                    await asyncio.sleep(0.3)
                 except:
                     raise Exception
 </code></pre>
@@ -319,10 +319,6 @@ Sendo então os pacotes a enviar para o dispositivo compostos da seguinte forma:
     loop = asyncio.get_running_loop()
     transport, protocol = await loop.create_datagram_endpoint(
         lambda: MyDatagramProtocol(),
-        # local_addr=('192.168.0.116', 65117),
-        # local_addr=('192.168.0.116', 10116),
-        # local_addr=('127.0.0.11', 10116),
-        # local_addr=('191.4.146.247', 10116),
         local_addr=('0.0.0.0', 10117),
         family=socket.AF_INET)
     print(f&quot;Server started on {transport.get_extra_info('sockname')}&quot;)
@@ -341,10 +337,8 @@ Sendo então os pacotes a enviar para o dispositivo compostos da seguinte forma:
 <pre><code class="language-python">def find(pasta):
     arquivos = os.listdir(pasta)
     for arquivo in arquivos:
-        print('puro',arquivo)
         caminho_arquivo = os.path.join(pasta, arquivo)
         if os.path.isfile(caminho_arquivo):
-            print(caminho_arquivo)
             path.append(caminho_arquivo)
     return path
 </code></pre>
@@ -356,17 +350,14 @@ Sendo então os pacotes a enviar para o dispositivo compostos da seguinte forma:
 </ul>
 <pre><code class="language-python">if __name__ == &quot;__main__&quot;:
     try:
-        cursor.execute('SELECT &quot;IMEI&quot; FROM copilotos.vozes;')
+        cursor.execute('SELECT &quot;IMEI&quot; FROM vozes;')
         results = cursor.fetchall()
         ID = [result[0] for result in results]
-        print('Ids no banco:',ID)
         pasta_vozes = &quot;./app/Files/Vozes/&quot;
         pasta_scripts = &quot;./app/Files/Prod_script/&quot;
         path_voz = find(pasta_vozes)
-        print(&quot;Arquivos de Voz:&quot;,path_voz)
         path = []
         path_script = find(pasta_scripts)
-        print(&quot;Script basico:&quot;,path_script)
         if path_voz:
             asyncio.run(main())
     except KeyboardInterrupt:

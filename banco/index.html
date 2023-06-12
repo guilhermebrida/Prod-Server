@@ -35,7 +35,7 @@
           <a href=".." class="icon icon-home"> App Produção
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
   </form>
 </div>
       </div>
@@ -78,7 +78,7 @@
       <div class="wy-nav-content">
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a> &raquo;</li>
       <li>Banco de Dados</li>
     <li class="wy-breadcrumbs-aside">
     </li>
@@ -100,16 +100,18 @@
 </ul>
 </li>
 </ul>
-<pre><code class="language-sql">CREATE SCHEMA copilotos;
-CREATE TABLE IF NOT EXISTS copilotos.vozes
+<pre><code class="language-sql">CREATE TABLE IF NOT EXISTS public.vozes
 (
     &quot;IMEI&quot; text COLLATE pg_catalog.&quot;default&quot; NOT NULL,
     &quot;SN&quot; text COLLATE pg_catalog.&quot;default&quot; NOT NULL,
-    &quot;VOZES&quot; bigint
+    &quot;VOZES&quot; bigint,
     reception_datetime timestamp with time zone DEFAULT timezone('America/Sao_Paulo', now())
     );
-INSERT INTO copilotos.vozes (&quot;IMEI&quot;,&quot;SN&quot;,&quot;VOZES&quot;) VALUES ('teste','teste1',22);
-INSERT INTO copilotos.vozes (&quot;IMEI&quot;,&quot;SN&quot;,&quot;VOZES&quot;) VALUES ('11111','111111',25);
+INSERT INTO public.vozes (&quot;IMEI&quot;,&quot;SN&quot;,&quot;VOZES&quot;) VALUES ('teste','teste',22);
+INSERT INTO public.vozes (&quot;IMEI&quot;,&quot;SN&quot;,&quot;VOZES&quot;) VALUES ('teste2','teste2',25);
+INSERT INTO public.vozes (&quot;IMEI&quot;,&quot;SN&quot;,&quot;VOZES&quot;) VALUES ('teste3','teste3',12);
+INSERT INTO public.vozes (&quot;IMEI&quot;,&quot;SN&quot;,&quot;VOZES&quot;) VALUES ('teste4','teste4',3);
+INSERT INTO public.vozes (&quot;IMEI&quot;,&quot;SN&quot;,&quot;VOZES&quot;) VALUES ('teste5','teste5',19);
 </code></pre>
               
             </div>

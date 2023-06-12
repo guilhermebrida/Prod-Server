@@ -35,7 +35,7 @@
           <a href=".." class="icon icon-home"> App Produção
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
   </form>
 </div>
       </div>
@@ -76,7 +76,7 @@
       <div class="wy-nav-content">
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a> &raquo;</li>
       <li>Docker</li>
     <li class="wy-breadcrumbs-aside">
     </li>
@@ -117,33 +117,38 @@ ENV POSTGRES_DB=postgres
 <h3 id="executa-a-aplicacao">Executa a aplicação</h3>
 <pre><code class="language-docker">CMD [&quot;python&quot;, &quot;-u&quot;,&quot;./app/udp-server.py&quot;]
 </code></pre>
-<h1 id="docker-compose">Docker compose</h1>
-<h2 id="services">Services</h2>
+<h1 id="yaml-para-o-docker-compose">YAML para o Docker compose</h1>
+<h2 id="server-prod">server-prod</h2>
 <h3 id="app">App</h3>
 <ul>
 <li>build: .: Configura a imagem do serviço a partir do Dockerfile localizado no diretório atual.</li>
 <li>restart: unless-stopped: Essa opção instrui o Docker a reiniciar o serviço automaticamente caso ele seja encerrado, a menos que seja explicitamente parado pelo usuário.</li>
-<li>ports: - "10116:10117/udp": Configura o mapeamento de porta do serviço. Neste exemplo, a porta 10117 do container é mapeada para a porta 10116 do host, usando o protocolo UDP.</li>
+<li>ports: - "10116:10116/udp": Configura o mapeamento de porta do serviço. Neste exemplo, a porta 10116 do container é mapeada para a porta 10116 do host, usando o protocolo UDP.</li>
 <li>depends_on: - postgres: Configura a dependência do serviço em relação a outro serviço chamado postgres. Isso significa que o serviço atual só será iniciado após a inicialização do serviço postgres.</li>
 <li>environment: - ENDPOINT=postgres: Configura uma variável de ambiente chamada ENDPOINT para o valor postgres.</li>
-<li>links: - postgres: Configura o link para o serviço postgres, permitindo que o serviço atual se conecte ao serviço postgres.</li>
+<li>external_links: - postgres: Configura o link para o serviço postgres, permitindo que o serviço atual se conecte ao serviço postgres.</li>
 <li>networks: - backing-services: Configura a rede a ser usada pelo serviço. Neste exemplo, o serviço está configurado para usar a rede chamada backing-services.</li>
 </ul>
-<pre><code class="language-docker">  app:
+<pre><code class="language-docker">version: &quot;2.1&quot;
+
+services:
+  app:
     build: .
     restart: unless-stopped
     ports:
-      - &quot;10116:10117/udp&quot;
-      # - &quot;65117:10117/udp&quot;
-    depends_on:
-      - postgres
+      - &quot;10116:10116/udp&quot;
     environment:
       - ENDPOINT=postgres
-    links:
-      - postgres
+    external_links:
+      - docker_python-postgres-1
     networks:
       - backing-services
+
+networks: 
+  backing-services:
+    driver: bridge
 </code></pre>
+<h2 id="docker-compose">docker-compose</h2>
 <h3 id="postgres">Postgres</h3>
 <ul>
 <li>
@@ -179,7 +184,35 @@ ENV POSTGRES_DB=postgres
       POSTGRES_PASSWORD: postgres
     # hostname: &quot;ec2-3-85-175-98.compute-1.amazonaws.com&quot;
 </code></pre>
+<h3 id="grafana">Grafana</h3>
+<ul>
+<li>
+<p>Image: Nome da imagem do Grafana Enterprise usada.</p>
+</li>
+<li>
+<p>Container_name: Nome do contêiner em execução.</p>
+</li>
+<li>
+<p>Restart: Política de reinicialização do contêiner.</p>
+</li>
+<li>
+<p>Ports: Portas do host mapeadas para as portas do contêiner.</p>
+</li>
+<li>
+<p>Volumes: Dados persistem entre reinicializações do contêiner.</p>
+</li>
+</ul>
+<pre><code>  grafana:
+    image: grafana/grafana-enterprise
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    volumes:
+      - grafana_data:/var/lib/grafana
+</code></pre>
 <h3 id="socat">Socat</h3>
+<h4 id="nao-utilizado-na-versao-mais-recente">Não utilizado na versão mais recente!!!</h4>
 <ul>
 <li>
 <p>image: alpine/socat: Configura a imagem do serviço a ser usada a partir do Docker Hub. Neste exemplo, é usada a imagem alpine/socat, que é uma imagem Alpine do Socat.</p>
