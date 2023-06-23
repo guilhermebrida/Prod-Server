@@ -80,8 +80,8 @@ class udp():
     async def handle_request(self,data, addr, transport,device_id):
         transport = transport
         self.message = data.decode(errors='ignore')
-        # if device_id == '0306' and not ALREADY_LISTEN:
-        if device_id == '0306' and device_id not in ID:
+        if device_id == '0306' and not ALREADY_LISTEN:
+        # if device_id == '0306' and device_id not in ID:
             xvm = XVM.generateXVM(device_id,str(8000).zfill(4),'>QSN<')
             print(xvm)
             transport.sendto(xvm.encode(), addr)
