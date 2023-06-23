@@ -81,7 +81,6 @@ class udp():
         transport = transport
         self.message = data.decode(errors='ignore')
         if device_id == '0306' and not ALREADY_LISTEN:
-            hora_ini = datetime.now()
             xvm = XVM.generateXVM(device_id,str(8000).zfill(4),'>QSN<')
             print(xvm)
             transport.sendto(xvm.encode(), addr)
@@ -218,6 +217,7 @@ def find(pasta):
 
 if __name__ == "__main__":
     try:
+        hora_ini = datetime.now()
         cursor.execute('SELECT "IMEI" FROM vozes;')
         results = cursor.fetchall()
         ID = [result[0] for result in results]
