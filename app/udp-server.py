@@ -92,7 +92,7 @@ class udp():
                     ALREADY_LISTEN.append(device_id)
                     RSN_DICT[device_id]=self.sn
                     print(RSN_DICT)
-                    # await self.envioScript(transport,addr,device_id)
+                    await self.envioScript(transport,addr,device_id)
                     await self.Arquivos(transport,self.message,addr,device_id)
                     await asyncio.sleep(0.5)
                     await self.fdir(transport,addr,device_id)
@@ -100,7 +100,7 @@ class udp():
         if re.search('>.*EOF.*',self.message) is not None:
             fdir = re.search('>.*EOF.*',self.message)
             self.vozes = fdir.group().split('_')[2].split(':')[1]
-            print('\nFDIR:',self.vozes)
+            # print('\nFDIR:',self.vozes)
             await self.criar(device_id)
             
 
@@ -145,7 +145,10 @@ class udp():
     async def criar(self,device_id):
         try:
             sn2 = RSN_DICT[device_id]
-            cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'{}\');'.format(device_id, sn2,self.vozes))
+            if self.fdir == 0:
+                cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', '1');'.format(device_id, sn2))
+            else:
+                cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'{}\');'.format(device_id, sn2,self.vozes))
             connection.commit()
         except:
             pass
@@ -175,7 +178,7 @@ class udp():
                 try:
                     xvm = XVM.generateXVM(device_id,str(8010+i).zfill(4),self.comandos[i])
                     transport.sendto(xvm.encode(),addr)
-                    await asyncio.sleep(0.3)
+                    await asyncio.sleep(0.1)
                 except:
                     raise Exception
 
