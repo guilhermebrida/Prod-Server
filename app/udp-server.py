@@ -5,7 +5,7 @@ import re
 from tkinter import filedialog as dlg
 import os
 import psycopg2
-
+from datetime import datetime
 
 ips = []
 ALREADY_LISTEN = []
@@ -81,6 +81,7 @@ class udp():
         transport = transport
         self.message = data.decode(errors='ignore')
         if device_id == '0306' and not ALREADY_LISTEN:
+            hora_ini = datetime.now()
             xvm = XVM.generateXVM(device_id,str(8000).zfill(4),'>QSN<')
             print(xvm)
             transport.sendto(xvm.encode(), addr)
@@ -101,6 +102,7 @@ class udp():
             self.vozes = fdir.group().split('_')[2].split(':')[1]
             print('\nFDIR:',self.vozes)
             await self.criar(device_id)
+            print('Tempo Total:',datetime.now()-hora_ini)
 
         
 
