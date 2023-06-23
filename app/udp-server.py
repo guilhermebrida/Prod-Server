@@ -145,11 +145,8 @@ class udp():
     async def criar(self,device_id):
         try:
             sn2 = RSN_DICT[device_id]
-            print(self.vozes)
-            if self.vozes == 0:
-                cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'1\');'.format(device_id, sn2))
-            else:
-                cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'{}\');'.format(device_id, sn2,self.vozes))
+            cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'{}\');'.format(device_id, sn2,self.vozes))
+            cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'1\');'.format(device_id, sn2))
             connection.commit()
         except:
             pass
