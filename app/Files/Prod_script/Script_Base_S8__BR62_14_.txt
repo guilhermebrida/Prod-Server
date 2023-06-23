@@ -17,9 +17,6 @@
 //Limpa as Flags
 >SCT96 0<
 
-//Configura a memória de registros e logger
->VSLG0000,16384,679936<
-
 //Liga perifericos
 >VSLP_GPS1_MDM1_MF0_RF0_WF1<
 
@@ -109,14 +106,6 @@
 
 //Limpa a variavel de alarmes
 >SCT88 0<
-
-//Memoria Reservada para arquivos MP3
-//MP3 = 200K * 16 = 3 MBytes
->VSRM12,0,8192,208383<
-
-//Configurar RM12 para áudio
-//onde: 9 volume do áudio, RM12 definido para áudio
->TCFG04,912<
 
 //Alarmes - CT88 entre 1 e 2147483647
 >SUT49,QCT88,7,10,1,2147483647<
