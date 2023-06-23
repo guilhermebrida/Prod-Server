@@ -175,7 +175,7 @@ class udp():
                 try:
                     xvm = XVM.generateXVM(device_id,str(8010+i).zfill(4),self.comandos[i])
                     transport.sendto(xvm.encode(),addr)
-                    await asyncio.sleep(0.3)
+                    await asyncio.sleep(0.2)
                 except:
                     raise Exception
 
