@@ -92,7 +92,7 @@ class udp():
                     ALREADY_LISTEN.append(device_id)
                     RSN_DICT[device_id]=self.sn
                     print(RSN_DICT)
-                    await self.envioScript(transport,addr,device_id)
+                    # await self.envioScript(transport,addr,device_id)
                     await self.Arquivos(transport,self.message,addr,device_id)
                     await asyncio.sleep(0.5)
                     await self.fdir(transport,addr,device_id)
