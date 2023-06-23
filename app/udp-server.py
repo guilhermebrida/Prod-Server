@@ -146,7 +146,7 @@ class udp():
         try:
             sn2 = RSN_DICT[device_id]
             if self.fdir == 0:
-                cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', '1');'.format(device_id, sn2))
+                cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'1\');'.format(device_id, sn2))
             else:
                 cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'{}\');'.format(device_id, sn2,self.vozes))
             connection.commit()
