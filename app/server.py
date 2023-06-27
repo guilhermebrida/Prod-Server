@@ -67,7 +67,7 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
         asyncio.create_task(self.processar_dados(data, addr))
 
     async def receber_msg(self,data):
-        if re.search('BINA.*NACK',data):
+        if re.search(b'BINA.*NACK',data):
             return True
         return False
 
@@ -93,7 +93,6 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
                             RSN_DICT[device_id] = self.sn
                             print(RSN_DICT)
                             await self.Arquivos(self.transport, self.message, addr, device_id)
-                            print(BLOCOS)
 
                 if self.flag is True:
                     for b in BLOCOS:
