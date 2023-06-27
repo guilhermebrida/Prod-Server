@@ -386,6 +386,7 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
                     print(RSN_DICT)
                     await self.envioScript(transport,addr,device_id)
                     await self.Arquivos(transport,self.message,addr,device_id)
+                    await asyncio.sleep(1)
         if re.search('REP_CFG.*',self.message) is not None:     
             rep_cfg = re.search('REP_CFG.*',self.message).group()        
             self.resp_msg = rep_cfg.split('_')[3]
@@ -429,11 +430,9 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
                 msg = format(msg,'X')
                 b = bytes.fromhex(bloc)
                 transport.sendto(b, addr)
-                await asyncio.sleep(0.2)
-                if re.search(b'.*NAK.*',self.data):
-                    print('deu ruim')
-                    break
-            await asyncio.sleep(0.2)
+                await asyncio.sleep(0.3)
+            await asyncio.sleep(0.3)
+        await asyncio.sleep(0.3)
         await self.fdir(transport,addr,device_id)
         print("tempo total:",time.time()-time_start)
 
