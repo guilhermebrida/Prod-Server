@@ -106,6 +106,7 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
                         continue
                 except:
                     pass
+            self.flag = False
         
  
 # class udp():
