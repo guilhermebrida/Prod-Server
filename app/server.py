@@ -72,9 +72,6 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
                 xvmMessage = XVM.parseXVM(data.decode(errors='ignore'))
                 msg = xvmMessage[0]
                 device_id = xvmMessage[1]
-                ack = XVM.generateAck(device_id, xvmMessage[2], msg)
-                self.transport.sendto(ack, addr)
-
                 self.message = data.decode(errors='ignore')
                 if device_id == '0306' and not ALREADY_LISTEN:
                     xvm = XVM.generateXVM(device_id, str(8000).zfill(4), '>QSN<')
