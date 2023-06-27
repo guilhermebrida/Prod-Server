@@ -380,7 +380,7 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
             if result is not None:
                 rsn = result.group()
                 self.sn = rsn.split('_')[0].split('>RSN')[1]
-                if self.sn and device_id not in ID:
+                if self.sn:
                     LISTENED.append(device_id)
                     RSN_DICT[device_id]=self.sn
                     print(RSN_DICT)
