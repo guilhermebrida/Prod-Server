@@ -98,6 +98,7 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
                         print(data)
                         try:
                             for i in range(3):
+                                print(f'tentantiva {i}: ',b)
                                 self.transport.sendto(b, addr)
                                 i += 1
                         except:
@@ -107,6 +108,8 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
                 except:
                     pass
             self.flag = False
+            print('finalizando')
+            await self.fdir(self.transport,addr,device_id)
         
  
 # class udp():
