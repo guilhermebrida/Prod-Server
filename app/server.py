@@ -88,29 +88,29 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
                             print(RSN_DICT)
                             await self.Arquivos(self.transport, self.message, addr, device_id)
 
-        if self.flag is True:
-            for b in BLOCOS:
-                try:
-                    self.transport.sendto(b, addr)
-                    await asyncio.sleep(0.5)
-
-                    if re.search('BINA.*NACK', data):
-                        print(data)
+                if self.flag is True:
+                    for b in BLOCOS:
                         try:
-                            for i in range(3):
-                                print(f'tentantiva {i}: ',b)
-                                self.transport.sendto(b, addr)
-                                i += 1
+                            self.transport.sendto(b, addr)
+                            await asyncio.sleep(0.5)
+
+                            if re.search('BINA.*NACK', data):
+                                print(data)
+                                try:
+                                    for i in range(3):
+                                        print(f'tentantiva {i}: ',b)
+                                        self.transport.sendto(b, addr)
+                                        i += 1
+                                except:
+                                    pass
+                            else:
+                                continue
                         except:
                             pass
-                    else:
-                        continue
-                except:
-                    pass
-            self.flag2 = True
-            print('finalizando')
-        if self.flag2 is True:
-            await self.fdir(self.transport,addr,device_id)
+                    self.flag2 = True
+                    print('finalizando')
+                if self.flag2 is True:
+                    await self.fdir(self.transport,addr,device_id)
         
  
 # class udp():
