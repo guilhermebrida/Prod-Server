@@ -107,8 +107,9 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
                         continue
                 except:
                     pass
-            self.flag = False
+            self.flag2 = True
             print('finalizando')
+        if self.flag2 is True:
             await self.fdir(self.transport,addr,device_id)
         
  
