@@ -450,12 +450,12 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
     async def criar(self,device_id):
         try:
             sn = RSN_DICT[device_id]
-            cursor.execute('INSERT INTO copilotos.vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'{}\');'.format(device_id, sn,self.vozes))
+            cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'{}\');'.format(device_id, sn,self.vozes))
             connection.commit()
         except:
             pass
         finally:
-            cursor.execute('SELECT "IMEI" FROM copilotos.vozes;')
+            cursor.execute('SELECT "IMEI" FROM vozes;')
             results = cursor.fetchall()
             ID = [result[0] for result in results]
             print('Ids no banco:',ID)
@@ -552,7 +552,7 @@ def find(pasta):
 
 if __name__ == "__main__":
     try:
-        cursor.execute('SELECT "IMEI" FROM copilotos.vozes;')
+        cursor.execute('SELECT "IMEI" FROM vozes;')
         results = cursor.fetchall()
         ID = [result[0] for result in results]
         print('Ids no banco:',ID)
