@@ -63,7 +63,13 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
         self.ids = []
 
     def datagram_received(self, data, addr):
+        
         asyncio.create_task(self.processar_dados(data, addr))
+
+    async def receber_msg(self,data):
+        if re.search('BINA.*NACK',data):
+            return True
+        return False
 
     async def processar_dados(self, data, addr):
         print(data)
@@ -87,32 +93,24 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
                             RSN_DICT[device_id] = self.sn
                             print(RSN_DICT)
                             await self.Arquivos(self.transport, self.message, addr, device_id)
+                            print(BLOCOS)
 
                 if self.flag is True:
                     for b in BLOCOS:
-                        try:
+                        self.transport.sendto(b, addr)
+                        ack = await self.receber_msg(data)
+                        if ack:
+                            continue
+                        else:
+                            print('tentando mais uma vez')
                             self.transport.sendto(b, addr)
-                            await asyncio.sleep(0.5)
-
-                            if re.search('BINA.*NACK', data):
-                                print(data)
-                                try:
-                                    for i in range(3):
-                                        print(f'tentantiva {i}: ',b)
-                                        self.transport.sendto(b, addr)
-                                        i += 1
-                                except:
-                                    pass
-                            else:
-                                continue
-                        except:
-                            pass
                     self.flag2 = True
                     print('finalizando')
                 if self.flag2 is True:
                     await self.fdir(self.transport,addr,device_id)
         
  
+
 # class udp():
     # async def handle_request(self,data, addr, transport,device_id):
     #     transport = transport
