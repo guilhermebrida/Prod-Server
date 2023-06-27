@@ -95,6 +95,7 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
                     await asyncio.sleep(0.5)
 
                     if re.search('BINA.*NACK', data):
+                        print(data)
                         try:
                             for i in range(3):
                                 self.transport.sendto(b, addr)
