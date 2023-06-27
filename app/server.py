@@ -400,7 +400,7 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
                 self.vozes = fdir.group().split('_')[2].split(':')[1]
                 print('\nFDIR:',self.vozes)
                 print(FDIR)
-                if len(FDIR) < 1:
+                if self.vozes < 1:
                     await self.reenvio(transport,self.message,addr,device_id)
                 else:
                     await self.criar(device_id)
