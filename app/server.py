@@ -62,58 +62,52 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
         self.transport = transport
         self.ids = []
 
-    async def datagram_received(self, data, addr):
+    def datagram_received(self, data, addr):
+        asyncio.create_task(self.processar_dados(data, addr))
+
+    async def processar_dados(self, data, addr):
         print(data)
-        if re.search('BINA.*',data.decode(errors='ignore')) is None:
+        if re.search('BINA.*', data.decode(errors='ignore')) is None:
             if XVM.isValidXVM(data.decode(errors='ignore')):
                 xvmMessage = XVM.parseXVM(data.decode(errors='ignore'))
                 msg = xvmMessage[0]
                 device_id = xvmMessage[1]
-                ack = XVM.generateAck(device_id,xvmMessage[2],msg)
-                self.transport.sendto(ack,addr)
-                # asyncio.create_task(udp().handle_request(data, addr, self.transport,device_id))
+                ack = XVM.generateAck(device_id, xvmMessage[2], msg)
+                self.transport.sendto(ack, addr)
+
                 self.message = data.decode(errors='ignore')
                 if device_id == '0306' and not ALREADY_LISTEN:
-                    xvm = XVM.generateXVM(device_id,str(8000).zfill(4),'>QSN<')
+                    xvm = XVM.generateXVM(device_id, str(8000).zfill(4), '>QSN<')
                     print(xvm)
                     self.transport.sendto(xvm.encode(), addr)
-                    result = re.search('>RSN.*',self.message)
+
+                    result = re.search('>RSN.*', self.message)
                     if result is not None:
                         rsn = result.group()
                         self.sn = rsn.split('_')[0].split('>RSN')[1]
                         if self.sn:
                             ALREADY_LISTEN.append(device_id)
-                            RSN_DICT[device_id]=self.sn
+                            RSN_DICT[device_id] = self.sn
                             print(RSN_DICT)
-                            # await self.envioScript(self.transport,addr,device_id)
-                            await self.Arquivos(self.transport,self.message,addr,device_id)
-                            # await asyncio.sleep(0.5)
-                            # await self.fdir(self.transport,addr,device_id)
+                            await self.Arquivos(self.transport, self.message, addr, device_id)
+
         if self.flag is True:
             for b in BLOCOS:
                 try:
-                    self.transport.sendto(b,addr)
+                    self.transport.sendto(b, addr)
                     await asyncio.sleep(0.5)
-                    if re.search('BINA.*NACK',data):
+
+                    if re.search('BINA.*NACK', data):
                         try:
                             for i in range(3):
-                                self.transport.sendto(b,addr)
-                                i = +1
+                                self.transport.sendto(b, addr)
+                                i += 1
                         except:
                             pass
                     else:
                         continue
                 except:
                     pass
-
-                # if re.search('>.*EOF.*',self.message) is not None:
-                #     fdir = re.search('>.*EOF.*',self.message)
-                #     self.vozes = fdir.group().split('_')[2].split(':')[1]
-                #     # print('\nFDIR:',self.vozes)
-                #     await self.criar(device_id)
-        if re.search(b'BINA.*',data) is not None:
-            print(data)
-
         
  
 # class udp():
