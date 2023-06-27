@@ -98,11 +98,13 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
                     for b in BLOCOS:
                         self.transport.sendto(b, addr)
                         ack = await self.receber_msg(data)
+                        await asyncio.sleep(1)
                         if ack:
                             continue
                         else:
                             print('tentando mais uma vez')
                             self.transport.sendto(b, addr)
+                            await asyncio.sleep(1)
                     self.flag2 = True
                     print('finalizando')
                 if self.flag2 is True:
