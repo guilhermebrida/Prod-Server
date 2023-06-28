@@ -67,7 +67,7 @@ def solicitar_serial_number(sock, device_id, addr):
 def enviar_bloco(sock, bloco, endereco):
     sock.sendto(bloco, endereco)
     response, _ = sock.recvfrom(1024)
-    print('Resposta do equipamento:', response.decode())
+    print('Resposta do equipamento:', response)
 
 def servidor_udp():
     global equipamentos_executados
