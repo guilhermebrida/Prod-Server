@@ -105,6 +105,7 @@ def servidor_udp():
                 xvmMessage = XVM.parseXVM(data.decode(errors='ignore'))
                 msg = xvmMessage[0]
                 device_id = xvmMessage[1]
+                print(device_id)
                 solicitar_serial_number(sock, device_id, addr)
                 envioScript(sock, device_id, addr)
                 blocos_de_dados = Arquivos(device_id)
