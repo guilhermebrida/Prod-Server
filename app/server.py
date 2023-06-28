@@ -17,6 +17,7 @@ path = []
 path_voz = []
 path_script = []
 FDIR = []
+SFB = []
 # # Lê as variáveis de ambiente
 postgres_host = os.environ['POSTGRES_HOST']
 postgres_port = os.environ['POSTGRES_PORT']
@@ -75,7 +76,8 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
                     print(RSN_DICT)
                     await self.envioScript(transport,addr,device_id)
                     await asyncio.sleep(1)
-        if re.search('REP_CFG.*',self.message) is not None:     
+        if re.search('REP_CFG.*',self.message) is not None and device_id not in SFB:
+            SFB.append(device_id)
             rep_cfg = re.search('REP_CFG.*',self.message).group()        
             self.resp_msg = rep_cfg.split('_')[3]
             self.conf = self.resp_msg.split(' ')[0]
@@ -88,7 +90,6 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
                 fdir = re.search('>.*EOF.*',self.message)
                 self.vozes = fdir.group().split('_')[2].split(':')[1]
                 print('\nFDIR:',self.vozes)
-                print(FDIR)
                 if int(self.vozes) < 1:
                     await self.reenvio(transport,self.message,addr,device_id)
                 else:
