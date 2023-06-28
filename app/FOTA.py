@@ -188,7 +188,7 @@ async def envioScript(sock, device_id, addr):
 
 def receber_resposta(sock):
     response, _ = sock.recvfrom(1024)
-    print('Resposta do equipamento:', response.decode())
+    print('Resposta:', response)
 
 
 async def fdir(sock, device_id, addr):
@@ -239,7 +239,7 @@ async def main():
                     await criar(device_id,vozes)
 
                 equipamentos_executados[ip_equipamento] = True
-        print('Mensagem recebida:', data.decode())
+        print('Mensagem recebida:', data)
 
 
 
