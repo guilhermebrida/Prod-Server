@@ -20,7 +20,9 @@ def generateAck(id,sequence):
 
 def generateXVM(id,sequence,message):
     print(type(id),type(sequence),type(message))
+    import ipdb; ipdb.set_trace()
     resp = message+';ID='+id+';#'+sequence+';*'
+    import ipdb; ipdb.set_trace()
     resp = resp+format(calcCheckSum(resp),'02X')+'<\r\n'
     return resp
 
