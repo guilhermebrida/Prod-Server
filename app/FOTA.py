@@ -91,12 +91,15 @@ def find(pasta):
 
 async def enviar_bloco(sock, bloco, endereco):
     sock.sendto(bloco, endereco)
-    await asyncio.wait_for(receber_resposta(sock), timeout=3)
+    # await asyncio.wait_for(receber_resposta(sock), timeout=3)
+    receber_resposta(sock, timeout=3)
+    
 
 async def solicitar_serial_number(sock, device_id, addr):
     xvm = XVM.generateXVM(device_id, str(8000).zfill(4), '>QSN<')
     sock.sendto(xvm.encode(), addr)
-    await asyncio.wait_for(receber_resposta(sock), timeout=3)
+    # await asyncio.wait_for(receber_resposta(sock), timeout=3)
+    receber_resposta(sock, timeout=3)
 
 async def envioScript(sock, device_id, addr):
     for i in path_script:
