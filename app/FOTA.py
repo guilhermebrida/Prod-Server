@@ -6,6 +6,8 @@ import os
 import time
 import threading
 import asyncio
+import selectors
+import time
 
 ips = []
 ALREADY_LISTEN = []
@@ -107,7 +109,8 @@ async def envioScript(sock, device_id, addr):
                 try:
                     xvm = XVM.generateXVM(device_id, str(8010+i).zfill(4), comandos[i])
                     sock.sendto(xvm.encode(), addr)
-                    await asyncio.wait_for(receber_resposta(sock), timeout=3)
+                    receber_resposta(sock, timeout=3)
+                    # await asyncio.wait_for(receber_resposta(sock), timeout=3)
                     # await asyncio.sleep(0.1)
                     break
                 except asyncio.TimeoutError:
@@ -118,11 +121,25 @@ async def envioScript(sock, device_id, addr):
     msg = XVM.generateXVM(device_id, str(8100), f'>QEP_CFG<')
     sock.sendto(msg.encode(), addr)
 
-async def receber_resposta(sock):
-    response, _ = sock.recvfrom(1024)
-    print('Resposta do equipamento:', response)
+# async def receber_resposta(sock):
+#     response, _ = sock.recvfrom(1024)
+#     print('Resposta do equipamento:', response)
 
+def receber_resposta(sock, timeout):
+    selector = selectors.DefaultSelector()
+    selector.register(sock, selectors.EVENT_READ)
 
+    start_time = time.time()
+    while True:
+        if time.time() - start_time >= timeout:
+            raise TimeoutError("Timeout: Nenhuma resposta recebida do equipamento.")
+
+        ready = selector.select(timeout=timeout)
+        for key, _ in ready:
+            if key.fileobj is sock:
+                response, _ = sock.recvfrom(1024)
+                return response.decode()
+            
 # async def fdir(sock, device_id, addr):
 #     try:
 #         xvm = XVM.generateXVM(device_id,str(8010).zfill(4),'>FDIR<')
