@@ -108,7 +108,7 @@ async def envioScript(sock, device_id, addr):
                     xvm = XVM.generateXVM(device_id, str(8010+i).zfill(4), comandos[i])
                     sock.sendto(xvm.encode(), addr)
                     await asyncio.wait_for(receber_resposta(sock), timeout=3)
-                    await asyncio.sleep(0.1)
+                    # await asyncio.sleep(0.1)
                     break
                 except asyncio.TimeoutError:
                     tentativas += 1
@@ -120,7 +120,7 @@ async def envioScript(sock, device_id, addr):
 
 async def receber_resposta(sock):
     response, _ = sock.recvfrom(1024)
-    print('Resposta do equipamento:', response.decode())
+    print('Resposta do equipamento:', response)
 
 
 # async def fdir(sock, device_id, addr):
