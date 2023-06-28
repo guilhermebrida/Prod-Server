@@ -112,7 +112,7 @@ async def envioScript(sock, device_id, addr):
                 try:
                     xvm = XVM.generateXVM(device_id, str(8010+i).zfill(4), comandos[i])
                     sock.sendto(xvm.encode(), addr)
-                    receber_resposta(sock, timeout=3)
+                    receber_resposta(sock, timeout=10)
                     # await asyncio.wait_for(receber_resposta(sock), timeout=3)
                     # await asyncio.sleep(0.1)
                     break
