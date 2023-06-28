@@ -68,7 +68,7 @@ def solicitar_serial_number(sock, device_id, addr):
 #     response, _ = sock.recvfrom(1024)
 #     print('Resposta do equipamento:', response)
 
-def envioScript(sock, addr, device_id):
+def envioScript(sock, device_id, addr):
     for i in path_script:
         print(i)
         with open(f'{i}') as f:
