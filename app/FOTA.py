@@ -47,7 +47,8 @@ equipamentos_executados = {}
 blocos_de_dados = [...]  
 
 
-def Arquivos(device_id):
+async def Arquivos(device_id):
+        print(device_id)
         sn = RSN_DICT[device_id]
         print(path_voz)
         for files in path_voz:
@@ -170,7 +171,7 @@ async def main():
                 device_id = xvmMessage[1]
                 await solicitar_serial_number(sock, device_id, addr)
                 await envioScript(sock, device_id, addr)
-                blocos_de_dados = Arquivos(device_id)
+                blocos_de_dados = await Arquivos(device_id)
                 for bloco in blocos_de_dados:
                     await enviar_bloco(sock, bloco, addr)
                 # vozes = await fdir(sock, device_id, addr)
