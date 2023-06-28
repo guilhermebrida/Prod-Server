@@ -21,6 +21,22 @@ arquivos = None
 BLOCOS = []
 LISTENED = []
 
+postgres_host = os.environ['POSTGRES_HOST']
+postgres_port = os.environ['POSTGRES_PORT']
+postgres_user = os.environ['POSTGRES_USER']
+postgres_password = os.environ['POSTGRES_PASSWORD']
+postgres_db = os.environ['POSTGRES_DB']
+
+connection = psycopg2.connect(
+    host=postgres_host,
+    # host="postgres",
+    port=postgres_port,
+    user=postgres_user,
+    password=postgres_password,
+    dbname=postgres_db
+)
+
+cursor = connection.cursor()
 
 
 host = '0.0.0.0'
@@ -158,6 +174,7 @@ async def envioScript(sock, device_id, addr):
             while tentativas < 3:
                 try:
                     xvm = XVM.generateXVM(device_id, str(8010+i).zfill(4), comandos[i])
+                    print(xvm)
                     sock.sendto(xvm.encode(), addr)
                     await asyncio.wait_for(receber_resposta(sock), timeout=3)
                     await asyncio.sleep(0.1)
@@ -172,6 +189,34 @@ async def envioScript(sock, device_id, addr):
 def receber_resposta(sock):
     response, _ = sock.recvfrom(1024)
     print('Resposta do equipamento:', response.decode())
+
+
+async def fdir(sock, device_id, addr):
+    try:
+        xvm = XVM.generateXVM(device_id,str(8010).zfill(4),'>FDIR<')
+        print(xvm)
+        sock.sendto(xvm.encode(), addr)
+        response, _ = sock.recvfrom(1024)
+        if re.search('>.*EOF.*',response.decode()) is not None:
+            fdir = re.search('>.*EOF.*',response.decode())
+            fdir = fdir.group().split('_')[2].split(':')[1]
+            print('\nFDIR:',fdir)
+            return fdir 
+    except:
+        raise Exception
+
+async def criar(device_id,vozes):
+    try:
+        sn = RSN_DICT[device_id]
+        cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'{}\');'.format(device_id, sn,vozes))
+        connection.commit()
+    except:
+        pass
+    finally:
+        cursor.execute('SELECT "IMEI" FROM vozes;')
+        results = cursor.fetchall()
+        ID = [result[0] for result in results]
+        print('Ids no banco:',ID)
 
 async def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -189,23 +234,12 @@ async def main():
                 blocos_de_dados = Arquivos(device_id)
                 for bloco in blocos_de_dados:
                     await enviar_bloco(sock, bloco, addr)
+                vozes = await fdir(sock, device_id, addr)
+                if int(vozes) < 1:
+                    await criar(device_id,vozes)
+
                 equipamentos_executados[ip_equipamento] = True
         print('Mensagem recebida:', data.decode())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
