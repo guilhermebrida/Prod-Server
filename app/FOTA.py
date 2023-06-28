@@ -112,12 +112,13 @@ async def envioScript(sock, device_id, addr):
                     break
                 except asyncio.TimeoutError:
                     tentativas += 1
+                    print(tentativas)
             if tentativas == 3:
                 raise Exception("Falha ao enviar comando. Número máximo de tentativas atingido.")
     msg = XVM.generateXVM(device_id, str(8100), f'>QEP_CFG<')
     sock.sendto(msg.encode(), addr)
 
-def receber_resposta(sock):
+async def receber_resposta(sock):
     response, _ = sock.recvfrom(1024)
     print('Resposta do equipamento:', response.decode())
 
