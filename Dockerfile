@@ -20,7 +20,9 @@ ENV POSTGRES_PASSWORD=postgres
 ENV POSTGRES_DB=postgres
 
 # CMD ["python", "-u","./app/udp-server.py"]
-CMD ["python", "-u","./app/server.py"]
+# CMD ["python", "-u","./app/server.py"]
+CMD ["python", "-u","./app/FOTA.py"]
+
 
 
 
