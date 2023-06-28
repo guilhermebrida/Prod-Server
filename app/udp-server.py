@@ -94,7 +94,7 @@ class udp():
                     print(RSN_DICT)
                     await self.envioScript(transport,addr,device_id)
                     await self.Arquivos(transport,self.message,addr,device_id)
-                    await asyncio.sleep(0.5)
+                    # await asyncio.sleep(0.5)
                     await self.fdir(transport,addr,device_id)
 
         if re.search('>.*EOF.*',self.message) is not None:
@@ -145,7 +145,7 @@ class udp():
     async def criar(self,device_id):
         try:
             sn2 = RSN_DICT[device_id]
-            cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'{}\');'.format(device_id, sn2,self.vozes))
+            # cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'{}\');'.format(device_id, sn2,self.vozes))
             cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'1\');'.format(device_id, sn2))
             connection.commit()
         except:
