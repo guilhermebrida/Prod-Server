@@ -67,6 +67,136 @@ def Arquivos(device_id):
         return BLOCOS
 
 
+
+def crc(x): 
+    cs_int = 0
+    sep = x
+    for i in range(len(sep)):
+        cs_int ^= (int(sep[i],16)) 
+    hexcs = hex(cs_int).replace('0x','')
+    return hexcs   
+
+def find(pasta):
+    arquivos = os.listdir(pasta)
+    print(arquivos)
+    for arquivo in arquivos:
+        # print('puro',arquivo)
+        caminho_arquivo = os.path.join(pasta, arquivo)
+        if os.path.isfile(caminho_arquivo):
+            path.append(caminho_arquivo)
+    return path
+
+
+async def enviar_bloco(sock, bloco, endereco):
+    sock.sendto(bloco, endereco)
+    await asyncio.wait_for(receber_resposta(sock), timeout=3)
+
+async def solicitar_serial_number(sock, device_id, addr):
+    xvm = XVM.generateXVM(device_id, str(8000).zfill(4), '>QSN<')
+    sock.sendto(xvm.encode(), addr)
+    await asyncio.wait_for(receber_resposta(sock), timeout=3)
+
+async def envioScript(sock, device_id, addr):
+    for i in path_script:
+        with open(f'{i}') as f:
+            tudo = f.read()
+        comandos = re.findall('(>.*<)', tudo)
+        for i in range(len(comandos)):
+            tentativas = 0
+            while tentativas < 3:
+                try:
+                    xvm = XVM.generateXVM(device_id, str(8010+i).zfill(4), comandos[i])
+                    print(xvm)
+                    sock.sendto(xvm.encode(), addr)
+                    await asyncio.wait_for(receber_resposta(sock), timeout=3)
+                    await asyncio.sleep(0.1)
+                    break
+                except asyncio.TimeoutError:
+                    tentativas += 1
+            if tentativas == 3:
+                raise Exception("Falha ao enviar comando. Número máximo de tentativas atingido.")
+    msg = XVM.generateXVM(device_id, str(8100), f'>QEP_CFG<')
+    sock.sendto(msg.encode(), addr)
+
+async def receber_resposta(sock):
+    response, _ = sock.recvfrom(1024)
+    print('Resposta do equipamento:', response.decode())
+
+
+# async def fdir(sock, device_id, addr):
+#     try:
+#         xvm = XVM.generateXVM(device_id,str(8010).zfill(4),'>FDIR<')
+#         print(xvm)
+#         sock.sendto(xvm.encode(), addr)
+#         response, _ = sock.recvfrom(1024)
+#         if re.search('>.*EOF.*',response.decode()) is not None:
+#             fdir = re.search('>.*EOF.*',response.decode())
+#             fdir = fdir.group().split('_')[2].split(':')[1]
+#             print('\nFDIR:',fdir)
+#             return fdir 
+#     except:
+#         raise Exception
+
+# async def criar(device_id,vozes):
+#     try:
+#         sn = RSN_DICT[device_id]
+#         cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'{}\');'.format(device_id, sn,vozes))
+#         connection.commit()
+#     except:
+#         pass
+#     finally:
+#         cursor.execute('SELECT "IMEI" FROM vozes;')
+#         results = cursor.fetchall()
+#         ID = [result[0] for result in results]
+#         print('Ids no banco:',ID)
+
+async def main():
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind((host, porta))
+    while True:
+        data, addr = sock.recvfrom(1024)
+        ip_equipamento = addr[0]
+        if ip_equipamento not in equipamentos_executados:
+            if XVM.isValidXVM(data.decode(errors='ignore')):
+                xvmMessage = XVM.parseXVM(data.decode(errors='ignore'))
+                msg = xvmMessage[0]
+                device_id = xvmMessage[1]
+                await solicitar_serial_number(sock, device_id, addr)
+                await envioScript(sock, device_id, addr)
+                blocos_de_dados = Arquivos(device_id)
+                for bloco in blocos_de_dados:
+                    await enviar_bloco(sock, bloco, addr)
+                # vozes = await fdir(sock, device_id, addr)
+                # if int(vozes) < 1:
+                #     await criar(device_id)
+
+                equipamentos_executados[ip_equipamento] = True
+        print('Mensagem recebida:', data.decode())
+
+
+
+
+if __name__ == "__main__":
+    try:
+        pasta_vozes = "./app/Files/Vozes/"
+        pasta_scripts = "./app/Files/Prod_script/"
+        path_voz = find(pasta_vozes)
+        # print("Arquivos de Voz:",path_voz)
+        path = []
+        path_script = find(pasta_scripts)
+        # print("Script basico:",path_script)
+        if path_voz:
+            asyncio.run(main())
+            # servidor_udp()
+    except KeyboardInterrupt:
+        pass
+
+
+
+
+
+
+
 # def solicitar_serial_number(sock, device_id, addr):
 #     xvm = XVM.generateXVM(device_id, str(8000).zfill(4), '>QSN<')
 #     print(xvm)
@@ -126,141 +256,4 @@ def Arquivos(device_id):
 #                     thread.join()
 #                 equipamentos_executados[ip_equipamento] = True
 #         print(data)
-
-
-
-def crc(x): 
-    cs_int = 0
-    sep = x
-    for i in range(len(sep)):
-        cs_int ^= (int(sep[i],16)) 
-    hexcs = hex(cs_int).replace('0x','')
-    return hexcs   
-
-def find(pasta):
-    arquivos = os.listdir(pasta)
-    print(arquivos)
-    for arquivo in arquivos:
-        # print('puro',arquivo)
-        caminho_arquivo = os.path.join(pasta, arquivo)
-        if os.path.isfile(caminho_arquivo):
-            path.append(caminho_arquivo)
-    return path
-
-
-
-
-
-
-
-
-
-async def enviar_bloco(sock, bloco, endereco):
-    sock.sendto(bloco, endereco)
-    await asyncio.wait_for(receber_resposta(sock), timeout=3)
-
-async def solicitar_serial_number(sock, device_id, addr):
-    xvm = XVM.generateXVM(device_id, str(8000).zfill(4), '>QSN<')
-    sock.sendto(xvm.encode(), addr)
-    await asyncio.wait_for(receber_resposta(sock), timeout=3)
-
-async def envioScript(sock, device_id, addr):
-    for i in path_script:
-        with open(f'{i}') as f:
-            tudo = f.read()
-        comandos = re.findall('(>.*<)', tudo)
-        for i in range(len(comandos)):
-            tentativas = 0
-            while tentativas < 3:
-                try:
-                    xvm = XVM.generateXVM(device_id, str(8010+i).zfill(4), comandos[i])
-                    print(xvm)
-                    sock.sendto(xvm.encode(), addr)
-                    await asyncio.wait_for(receber_resposta(sock), timeout=3)
-                    await asyncio.sleep(0.1)
-                    break
-                except asyncio.TimeoutError:
-                    tentativas += 1
-            if tentativas == 3:
-                raise Exception("Falha ao enviar comando. Número máximo de tentativas atingido.")
-    msg = XVM.generateXVM(device_id, str(8100), f'>QEP_CFG<')
-    sock.sendto(msg.encode(), addr)
-
-def receber_resposta(sock):
-    response, _ = sock.recvfrom(1024)
-    print('Resposta do equipamento:', response.decode())
-
-
-async def fdir(sock, device_id, addr):
-    try:
-        xvm = XVM.generateXVM(device_id,str(8010).zfill(4),'>FDIR<')
-        print(xvm)
-        sock.sendto(xvm.encode(), addr)
-        response, _ = sock.recvfrom(1024)
-        if re.search('>.*EOF.*',response.decode()) is not None:
-            fdir = re.search('>.*EOF.*',response.decode())
-            fdir = fdir.group().split('_')[2].split(':')[1]
-            print('\nFDIR:',fdir)
-            return fdir 
-    except:
-        raise Exception
-
-async def criar(device_id,vozes):
-    try:
-        sn = RSN_DICT[device_id]
-        cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'{}\');'.format(device_id, sn,vozes))
-        connection.commit()
-    except:
-        pass
-    finally:
-        cursor.execute('SELECT "IMEI" FROM vozes;')
-        results = cursor.fetchall()
-        ID = [result[0] for result in results]
-        print('Ids no banco:',ID)
-
-async def main():
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind((host, porta))
-    while True:
-        data, addr = sock.recvfrom(1024)
-        ip_equipamento = addr[0]
-        if ip_equipamento not in equipamentos_executados:
-            if XVM.isValidXVM(data.decode(errors='ignore')):
-                xvmMessage = XVM.parseXVM(data.decode(errors='ignore'))
-                msg = xvmMessage[0]
-                device_id = xvmMessage[1]
-                await solicitar_serial_number(sock, device_id, addr)
-                await envioScript(sock, device_id, addr)
-                blocos_de_dados = Arquivos(device_id)
-                for bloco in blocos_de_dados:
-                    await enviar_bloco(sock, bloco, addr)
-                vozes = await fdir(sock, device_id, addr)
-                if int(vozes) < 1:
-                    await criar(device_id,vozes)
-
-                equipamentos_executados[ip_equipamento] = True
-        print('Mensagem recebida:', data.decode())
-
-
-
-
-if __name__ == "__main__":
-    try:
-        pasta_vozes = "./app/Files/Vozes/"
-        pasta_scripts = "./app/Files/Prod_script/"
-        path_voz = find(pasta_vozes)
-        # print("Arquivos de Voz:",path_voz)
-        path = []
-        path_script = find(pasta_scripts)
-        # print("Script basico:",path_script)
-        if path_voz:
-            asyncio.run(main())
-            # servidor_udp()
-    except KeyboardInterrupt:
-        pass
-
-
-
-
-
 
