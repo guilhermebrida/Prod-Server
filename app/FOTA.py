@@ -19,7 +19,7 @@ ID=[]
 blocos_envio = []
 arquivos = None
 BLOCOS = []
-
+LISTENED = []
 
 
 
@@ -50,6 +50,20 @@ def Arquivos(device_id):
                 BLOCOS.append(b)
         return BLOCOS
 
+
+def solicitar_serial_number(sock, device_id, addr):
+    xvm = XVM.generateXVM(device_id, str(8000).zfill(4), '>QSN<')
+    print(xvm)
+    sock.sendto(xvm.encode(), addr)
+    response, _ = sock.recvfrom(1024)
+    result = re.search('>RSN.*', response.decode())
+    if result is not None:
+        rsn = result.group()
+        sn = rsn.split('_')[0].split('>RSN')[1]
+        if sn:
+            LISTENED.append(device_id)
+            RSN_DICT[device_id] = sn
+
 def enviar_bloco(sock, bloco, endereco):
     sock.sendto(bloco, endereco)
     response, _ = sock.recvfrom(1024)
@@ -69,6 +83,7 @@ def servidor_udp():
                 xvmMessage = XVM.parseXVM(data.decode(errors='ignore'))
                 msg = xvmMessage[0]
                 device_id = xvmMessage[1]
+                solicitar_serial_number(sock, device_id, addr)
                 blocos_de_dados = Arquivos(device_id)
                 for bloco in blocos_de_dados:
                     thread = threading.Thread(target=enviar_bloco, args=(sock, bloco, addr))
