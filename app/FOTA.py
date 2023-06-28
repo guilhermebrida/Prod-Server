@@ -92,14 +92,14 @@ def find(pasta):
 async def enviar_bloco(sock, bloco, endereco):
     sock.sendto(bloco, endereco)
     # await asyncio.wait_for(receber_resposta(sock), timeout=3)
-    receber_resposta(sock, timeout=3)
+    receber_resposta(sock)
     
 
 async def solicitar_serial_number(sock, device_id, addr):
     xvm = XVM.generateXVM(device_id, str(8000).zfill(4), '>QSN<')
     sock.sendto(xvm.encode(), addr)
     # await asyncio.wait_for(receber_resposta(sock), timeout=3)
-    receber_resposta(sock, timeout=3)
+    receber_resposta(sock)
 
 async def envioScript(sock, device_id, addr):
     for i in path_script:
@@ -112,8 +112,8 @@ async def envioScript(sock, device_id, addr):
                 try:
                     xvm = XVM.generateXVM(device_id, str(8010+i).zfill(4), comandos[i])
                     sock.sendto(xvm.encode(), addr)
-                    receber_resposta(sock, timeout=10)
                     # await asyncio.wait_for(receber_resposta(sock), timeout=3)
+                    receber_resposta(sock)
                     # await asyncio.sleep(0.1)
                     break
                 except asyncio.TimeoutError:
@@ -124,24 +124,11 @@ async def envioScript(sock, device_id, addr):
     msg = XVM.generateXVM(device_id, str(8100), f'>QEP_CFG<')
     sock.sendto(msg.encode(), addr)
 
-# async def receber_resposta(sock):
-#     response, _ = sock.recvfrom(1024)
-#     print('Resposta do equipamento:', response)
+def receber_resposta(sock):
+    response, _ = sock.recvfrom(1024)
+    print('Resposta do equipamento:', response)
 
-def receber_resposta(sock, timeout):
-    selector = selectors.DefaultSelector()
-    selector.register(sock, selectors.EVENT_READ)
 
-    start_time = time.time()
-    while True:
-        if time.time() - start_time >= timeout:
-            raise TimeoutError("Timeout: Nenhuma resposta recebida do equipamento.")
-
-        ready = selector.select(timeout=timeout)
-        for key, _ in ready:
-            if key.fileobj is sock:
-                response, _ = sock.recvfrom(1024)
-                return response.decode()
             
 # async def fdir(sock, device_id, addr):
 #     try:
