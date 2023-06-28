@@ -122,7 +122,7 @@ class MyDatagramProtocol(asyncio.DatagramProtocol):
                 transport.sendto(b, addr)
                 await asyncio.sleep(0.3)
             await asyncio.sleep(0.3)
-        await asyncio.sleep(0.3)
+        await asyncio.sleep(2)
         await self.fdir(transport,addr,device_id)
         print("tempo total:",time.time()-time_start)
 
