@@ -8,6 +8,7 @@ import threading
 import asyncio
 import selectors
 import time
+from tenacity import retry, stop_after_delay, wait_fixed
 
 ips = []
 ALREADY_LISTEN = []
@@ -93,7 +94,7 @@ def find(pasta):
 async def enviar_bloco(sock, bloco, endereco):
     sock.sendto(bloco, endereco)
     # await asyncio.wait_for(receber_resposta(sock), timeout=3)
-    receber_resposta(sock)
+    await receber_resposta(sock)
     
 
 async def solicitar_serial_number(sock, device_id, addr):
@@ -110,7 +111,12 @@ async def solicitar_serial_number(sock, device_id, addr):
             RSN_DICT[device_id] = sn
     # await asyncio.wait_for(receber_resposta(sock), timeout=3)
     # receber_resposta(sock)
-    
+
+@retry(stop=stop_after_delay(5), wait=wait_fixed(1))
+async def enviar_mensagem_udp(sock, addr, mensagem):
+    sock.sendto(mensagem.encode(), addr)
+    response, _ = await sock.recvfrom(1024)
+    return response
 
 async def envioScript(sock, device_id, addr):
     timeout = 5
@@ -120,17 +126,15 @@ async def envioScript(sock, device_id, addr):
         comandos = re.findall('(>.*<)', tudo)
         for i in range(len(comandos)):
             try:
-                for i in range(5):
-                    print(i)
                     xvm = XVM.generateXVM(device_id, str(8010+i).zfill(4), comandos[i])
-                    start_time = time.time()
-                    sock.sendto(xvm.encode(), addr)
-                    await receber_resposta(sock)
-                    if time.time() - start_time >= timeout:
-                        continue
+                    # start_time = time.time()
+                    # sock.sendto(xvm.encode(), addr)
+                    # await receber_resposta(sock)
+                    response = await enviar_mensagem_udp(sock, addr, xvm)
+                    if response is not None:
+                        print(response)
             except asyncio.TimeoutError:
-                tentativas += 1
-                print(tentativas)
+                print('deu ruim')
     msg = XVM.generateXVM(device_id, str(8100), f'>QEP_CFG<')
     sock.sendto(msg.encode(), addr)
 
@@ -176,6 +180,7 @@ async def criar(device_id,vozes):
 async def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((host, porta))
+    sock.settimeout(5)
     while True:
         data, addr = sock.recvfrom(1024)
         ip_equipamento = addr[0]
