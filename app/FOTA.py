@@ -154,20 +154,15 @@ async def receber_resposta(sock):
 
             
 def fdir(sock, device_id, addr):
-    try:
-        xvm = XVM.generateXVM(device_id,str(8010).zfill(4),'>FDIR<')
-        print(xvm)
-        for i in range(5):
-            print(i)
-            sock.sendto(xvm.encode(), addr)
-            response, _ = sock.recvfrom(1024)
-            if re.search('>.*EOF.*',response.decode()) is not None:
-                fdir = re.search('>.*EOF.*',response.decode())
-                fdir = fdir.group().split('_')[2].split(':')[1]
-                print('\nFDIR:',fdir)
-                return fdir 
-    except:
-        raise Exception
+    xvm = XVM.generateXVM(device_id,str(8010).zfill(4),'>FDIR<')
+    print(xvm)
+    response = enviar_mensagem_udp(sock,addr,xvm)
+    if re.search('>.*EOF.*',response.decode()) is not None:
+        fdir = re.search('>.*EOF.*',response.decode())
+        fdir = fdir.group().split('_')[2].split(':')[1]
+        print('\nFDIR:',fdir)
+        return fdir 
+
 
 async def criar(device_id,vozes):
     try:
@@ -204,9 +199,7 @@ async def main():
                 vozes = fdir(sock, device_id, addr)
                 if vozes is not None:
                     if int(vozes) < 1:
-                        await criar(device_id,vozes)
-                else:
-                    vozes = await fdir(sock, device_id, addr)
+                        criar(device_id,vozes)
                 # equipamentos_executados[ip_equipamento] = True
         print('Mensagem recebida:', data.decode())
 
