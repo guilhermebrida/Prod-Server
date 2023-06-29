@@ -126,6 +126,7 @@ def enviar_mensagem_udp(sock, addr, mensagem):
     if re.search(b'RUV.*',response) or re.search(b'.*NAK.*',response):
         raise TryAgain
     if time.time() - start_time >= timeout:
+        print("timeout")
         raise TryAgain
     return response
 
@@ -206,6 +207,7 @@ async def main():
                 blocos_de_dados = await Arquivos(device_id)
                 for bloco in blocos_de_dados:
                     # await enviar_bloco(sock, bloco, addr)
+                    print(type(bloco))
                     enviar_mensagem_udp(sock, addr, bloco)
                 vozes = await fdir(sock, device_id, addr)
                 if vozes is not None:
