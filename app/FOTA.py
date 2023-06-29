@@ -112,11 +112,12 @@ async def solicitar_serial_number(sock, device_id, addr):
     # await asyncio.wait_for(receber_resposta(sock), timeout=3)
     # receber_resposta(sock)
 
-@retry(stop=stop_after_delay(5), wait=wait_fixed(1))
-async def enviar_mensagem_udp(sock, addr, mensagem):
+@retry
+def enviar_mensagem_udp(sock, addr, mensagem):
     print(mensagem)
     sock.sendto(mensagem.encode(), addr)
     response, _ = sock.recvfrom(1024)
+    print(response)
     return response
 
 async def envioScript(sock, device_id, addr):
@@ -131,9 +132,9 @@ async def envioScript(sock, device_id, addr):
                     # start_time = time.time()
                     # sock.sendto(xvm.encode(), addr)
                     # await receber_resposta(sock)
-                    response = await enviar_mensagem_udp(sock, addr, xvm)
-                    if response is not None:
-                        print(response)
+                    response = enviar_mensagem_udp(sock, addr, xvm)
+                    # if response is not None:
+                    #     print(response)
             except asyncio.TimeoutError:
                 print('deu ruim')
     msg = XVM.generateXVM(device_id, str(8100), f'>QEP_CFG<')
@@ -195,7 +196,8 @@ async def main():
                 await envioScript(sock, device_id, addr)
                 blocos_de_dados = await Arquivos(device_id)
                 for bloco in blocos_de_dados:
-                    await enviar_bloco(sock, bloco, addr)
+                    # await enviar_bloco(sock, bloco, addr)
+                    enviar_mensagem_udp(sock, addr, bloco)
                 vozes = await fdir(sock, device_id, addr)
                 if vozes is not None:
                     if int(vozes) < 1:
