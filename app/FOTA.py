@@ -120,21 +120,18 @@ async def envioScript(sock, device_id, addr):
         comandos = re.findall('(>.*<)', tudo)
         for i in range(len(comandos)):
             tentativas = 0
-            while tentativas < 3:
-                try:
-                    xvm = XVM.generateXVM(device_id, str(8010+i).zfill(4), comandos[i])
+            try:
+                xvm = XVM.generateXVM(device_id, str(8010+i).zfill(4), comandos[i])
+                sock.sendto(xvm.encode(), addr)
+                # await asyncio.wait_for(receber_resposta(sock), timeout=3)
+                while receber_resposta(sock) is False:
+                    print('tentei')
                     sock.sendto(xvm.encode(), addr)
-                    # await asyncio.wait_for(receber_resposta(sock), timeout=3)
-                    while receber_resposta(sock) is False:
-                        sock.sendto(xvm.encode(), addr)
-                        if True:
-                            break
-                    break
-                except asyncio.TimeoutError:
-                    tentativas += 1
-                    print(tentativas)
-            if tentativas == 3:
-                raise Exception("Falha ao enviar comando. Número máximo de tentativas atingido.")
+                    if True:
+                        break
+            except asyncio.TimeoutError:
+                tentativas += 1
+                print(tentativas)
     msg = XVM.generateXVM(device_id, str(8100), f'>QEP_CFG<')
     sock.sendto(msg.encode(), addr)
 
@@ -176,9 +173,11 @@ async def criar(device_id,vozes):
         print('Ids no banco:',ID)
 
 async def main():
+    socket.setdefaulttimeout(5)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((host, porta))
     while True:
+        print('aqui')
         data, addr = sock.recvfrom(1024)
         ip_equipamento = addr[0]
         if ip_equipamento not in equipamentos_executados:
@@ -192,9 +191,11 @@ async def main():
                 for bloco in blocos_de_dados:
                     await enviar_bloco(sock, bloco, addr)
                 vozes = await fdir(sock, device_id, addr)
-                if int(vozes) < 1:
-                    await criar(device_id,vozes)
-
+                if vozes is not None:
+                    if int(vozes) < 1:
+                        await criar(device_id,vozes)
+                else:
+                    vozes = await fdir(sock, device_id, addr)
                 equipamentos_executados[ip_equipamento] = True
         print('Mensagem recebida:', data.decode())
 
