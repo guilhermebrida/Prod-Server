@@ -114,6 +114,7 @@ async def solicitar_serial_number(sock, device_id, addr):
 
 @retry(stop=stop_after_delay(5), wait=wait_fixed(1))
 async def enviar_mensagem_udp(sock, addr, mensagem):
+    print(mensagem)
     sock.sendto(mensagem.encode(), addr)
     response, _ = sock.recvfrom(1024)
     return response
@@ -127,7 +128,6 @@ async def envioScript(sock, device_id, addr):
         for i in range(len(comandos)):
             try:
                     xvm = XVM.generateXVM(device_id, str(8010+i).zfill(4), comandos[i])
-                    print(xvm)
                     # start_time = time.time()
                     # sock.sendto(xvm.encode(), addr)
                     # await receber_resposta(sock)
@@ -185,11 +185,12 @@ async def main():
     while True:
         data, addr = sock.recvfrom(1024)
         ip_equipamento = addr[0]
-        if ip_equipamento not in equipamentos_executados:
-            if XVM.isValidXVM(data.decode(errors='ignore')):
-                xvmMessage = XVM.parseXVM(data.decode(errors='ignore'))
-                msg = xvmMessage[0]
-                device_id = xvmMessage[1]
+        # if ip_equipamento not in equipamentos_executados:
+        if XVM.isValidXVM(data.decode(errors='ignore')):
+            xvmMessage = XVM.parseXVM(data.decode(errors='ignore'))
+            msg = xvmMessage[0]
+            device_id = xvmMessage[1]
+            if device_id not in RSN_DICT:
                 await solicitar_serial_number(sock, device_id, addr)
                 await envioScript(sock, device_id, addr)
                 blocos_de_dados = await Arquivos(device_id)
@@ -201,7 +202,7 @@ async def main():
                         await criar(device_id,vozes)
                 else:
                     vozes = await fdir(sock, device_id, addr)
-                equipamentos_executados[ip_equipamento] = True
+                # equipamentos_executados[ip_equipamento] = True
         print('Mensagem recebida:', data.decode())
 
 
