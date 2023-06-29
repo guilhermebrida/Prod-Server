@@ -113,7 +113,7 @@ async def solicitar_serial_number(sock, device_id, addr):
     
 
 async def envioScript(sock, device_id, addr):
-    timeout = 5
+    
     for i in path_script:
         with open(f'{i}') as f:
             tudo = f.read()
@@ -124,12 +124,11 @@ async def envioScript(sock, device_id, addr):
                 try:
                     xvm = XVM.generateXVM(device_id, str(8010+i).zfill(4), comandos[i])
                     sock.sendto(xvm.encode(), addr)
-                    start_time = time.time()
-                    if time.time() - start_time >= timeout:
-                        print('timeout')
                     # await asyncio.wait_for(receber_resposta(sock), timeout=3)
-                    receber_resposta(sock)
-                    # await asyncio.sleep(0.1)
+                    while receber_resposta(sock) is False:
+                        sock.sendto(xvm.encode(), addr)
+                        if True:
+                            break
                     break
                 except asyncio.TimeoutError:
                     tentativas += 1
@@ -140,7 +139,11 @@ async def envioScript(sock, device_id, addr):
     sock.sendto(msg.encode(), addr)
 
 def receber_resposta(sock):
+    timeout = 5
+    start_time = time.time()
     response, _ = sock.recvfrom(1024)
+    if time.time() - start_time >= timeout:
+        return False
     print('Resposta:', response)
 
 
@@ -190,7 +193,7 @@ async def main():
                     await enviar_bloco(sock, bloco, addr)
                 vozes = await fdir(sock, device_id, addr)
                 if int(vozes) < 1:
-                    await criar(device_id)
+                    await criar(device_id,vozes)
 
                 equipamentos_executados[ip_equipamento] = True
         print('Mensagem recebida:', data.decode())
