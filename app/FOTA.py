@@ -8,7 +8,7 @@ import threading
 import asyncio
 import selectors
 import time
-from tenacity import retry, stop_after_delay, wait_fixed
+from tenacity import retry, stop_after_delay, wait_fixed, stop_after_attempt
 
 ips = []
 ALREADY_LISTEN = []
