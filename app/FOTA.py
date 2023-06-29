@@ -141,32 +141,32 @@ def receber_resposta(sock):
 
 
             
-# async def fdir(sock, device_id, addr):
-#     try:
-#         xvm = XVM.generateXVM(device_id,str(8010).zfill(4),'>FDIR<')
-#         print(xvm)
-#         sock.sendto(xvm.encode(), addr)
-#         response, _ = sock.recvfrom(1024)
-#         if re.search('>.*EOF.*',response.decode()) is not None:
-#             fdir = re.search('>.*EOF.*',response.decode())
-#             fdir = fdir.group().split('_')[2].split(':')[1]
-#             print('\nFDIR:',fdir)
-#             return fdir 
-#     except:
-#         raise Exception
+async def fdir(sock, device_id, addr):
+    try:
+        xvm = XVM.generateXVM(device_id,str(8010).zfill(4),'>FDIR<')
+        print(xvm)
+        sock.sendto(xvm.encode(), addr)
+        response, _ = sock.recvfrom(1024)
+        if re.search('>.*EOF.*',response.decode()) is not None:
+            fdir = re.search('>.*EOF.*',response.decode())
+            fdir = fdir.group().split('_')[2].split(':')[1]
+            print('\nFDIR:',fdir)
+            return fdir 
+    except:
+        raise Exception
 
-# async def criar(device_id,vozes):
-#     try:
-#         sn = RSN_DICT[device_id]
-#         cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'{}\');'.format(device_id, sn,vozes))
-#         connection.commit()
-#     except:
-#         pass
-#     finally:
-#         cursor.execute('SELECT "IMEI" FROM vozes;')
-#         results = cursor.fetchall()
-#         ID = [result[0] for result in results]
-#         print('Ids no banco:',ID)
+async def criar(device_id,vozes):
+    try:
+        sn = RSN_DICT[device_id]
+        cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'{}\');'.format(device_id, sn,vozes))
+        connection.commit()
+    except:
+        pass
+    finally:
+        cursor.execute('SELECT "IMEI" FROM vozes;')
+        results = cursor.fetchall()
+        ID = [result[0] for result in results]
+        print('Ids no banco:',ID)
 
 async def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
