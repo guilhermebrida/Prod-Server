@@ -180,7 +180,7 @@ async def criar(device_id,vozes):
 async def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((host, porta))
-    sock.setblocking(False)
+    # sock.setblocking(False)
     while True:
         data, addr = sock.recvfrom(1024)
         ip_equipamento = addr[0]
