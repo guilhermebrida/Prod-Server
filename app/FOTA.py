@@ -101,8 +101,6 @@ def solicitar_serial_number(sock, device_id, addr):
     xvm = XVM.generateXVM(device_id, str(8000).zfill(4), '>QSN<')
     print(xvm)
     response = enviar_mensagem_udp(sock,addr,xvm)
-    # sock.sendto(xvm.encode(), addr)
-    # response, _ = sock.recvfrom(1024)
     result = re.search('>RSN.*', response.decode())
     if result is not None:
         rsn = result.group()
@@ -110,8 +108,6 @@ def solicitar_serial_number(sock, device_id, addr):
         if sn:
             LISTENED.append(device_id)
             RSN_DICT[device_id] = sn
-    # await asyncio.wait_for(receber_resposta(sock), timeout=3)
-    # receber_resposta(sock)
 
 @retry(stop=stop_after_attempt(30), wait=wait_fixed(2))
 def enviar_mensagem_udp(sock, addr, mensagem):
@@ -140,12 +136,8 @@ def envioScript(sock, device_id, addr):
         for i in range(len(comandos)):
             try:
                     xvm = XVM.generateXVM(device_id, str(8010+i).zfill(4), comandos[i])
-                    # start_time = time.time()
                     # sock.sendto(xvm.encode(), addr)
-                    # await receber_resposta(sock)
                     response = enviar_mensagem_udp(sock, addr, xvm)
-                    # if response is not None:
-                    #     print(response)
             except asyncio.TimeoutError:
                 print('deu ruim')
     msg = XVM.generateXVM(device_id, str(8100), f'>QEP_CFG<')
@@ -161,7 +153,7 @@ async def receber_resposta(sock):
 
 
             
-async def fdir(sock, device_id, addr):
+def fdir(sock, device_id, addr):
     try:
         xvm = XVM.generateXVM(device_id,str(8010).zfill(4),'>FDIR<')
         print(xvm)
@@ -208,9 +200,8 @@ async def main():
                 blocos_de_dados = Arquivos(device_id)
                 for bloco in blocos_de_dados:
                     # await enviar_bloco(sock, bloco, addr)
-                    print(type(bloco))
                     enviar_mensagem_udp(sock, addr, bloco)
-                vozes = await fdir(sock, device_id, addr)
+                vozes = fdir(sock, device_id, addr)
                 if vozes is not None:
                     if int(vozes) < 1:
                         await criar(device_id,vozes)
