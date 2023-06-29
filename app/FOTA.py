@@ -115,7 +115,7 @@ def solicitar_serial_number(sock, device_id, addr):
 @retry(stop=stop_after_attempt(30), wait=wait_fixed(2))
 def enviar_mensagem_udp(sock, addr, mensagem):
     timeout = 3
-    if type(mensagem) == 'bytes':
+    if type(mensagem) == bytes:
         sock.sendto(mensagem, addr)
     else:
         print(mensagem)
