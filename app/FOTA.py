@@ -113,29 +113,28 @@ async def solicitar_serial_number(sock, device_id, addr):
     
 
 async def envioScript(sock, device_id, addr):
-    
+    timeout = 5
     for i in path_script:
         with open(f'{i}') as f:
             tudo = f.read()
         comandos = re.findall('(>.*<)', tudo)
         for i in range(len(comandos)):
-            tentativas = 0
             try:
-                xvm = XVM.generateXVM(device_id, str(8010+i).zfill(4), comandos[i])
-                sock.sendto(xvm.encode(), addr)
-                # await asyncio.wait_for(receber_resposta(sock), timeout=3)
-                while receber_resposta(sock) is False:
-                    print('tentei')
+                for i in range(5):
+                    print(i)
+                    xvm = XVM.generateXVM(device_id, str(8010+i).zfill(4), comandos[i])
+                    start_time = time.time()
                     sock.sendto(xvm.encode(), addr)
-                    if True:
-                        break
+                    await receber_resposta(sock)
+                    if time.time() - start_time >= timeout:
+                        continue
             except asyncio.TimeoutError:
                 tentativas += 1
                 print(tentativas)
     msg = XVM.generateXVM(device_id, str(8100), f'>QEP_CFG<')
     sock.sendto(msg.encode(), addr)
 
-def receber_resposta(sock):
+async def receber_resposta(sock):
     timeout = 5
     start_time = time.time()
     response, _ = sock.recvfrom(1024)
@@ -149,13 +148,15 @@ async def fdir(sock, device_id, addr):
     try:
         xvm = XVM.generateXVM(device_id,str(8010).zfill(4),'>FDIR<')
         print(xvm)
-        sock.sendto(xvm.encode(), addr)
-        response, _ = sock.recvfrom(1024)
-        if re.search('>.*EOF.*',response.decode()) is not None:
-            fdir = re.search('>.*EOF.*',response.decode())
-            fdir = fdir.group().split('_')[2].split(':')[1]
-            print('\nFDIR:',fdir)
-            return fdir 
+        for i in range(5):
+            print(i)
+            sock.sendto(xvm.encode(), addr)
+            response, _ = sock.recvfrom(1024)
+            if re.search('>.*EOF.*',response.decode()) is not None:
+                fdir = re.search('>.*EOF.*',response.decode())
+                fdir = fdir.group().split('_')[2].split(':')[1]
+                print('\nFDIR:',fdir)
+                return fdir 
     except:
         raise Exception
 
@@ -173,13 +174,9 @@ async def criar(device_id,vozes):
         print('Ids no banco:',ID)
 
 async def main():
-    socket.setdefaulttimeout(5)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((host, porta))
     while True:
-        print('aqui')
-        if TimeoutError:
-            continue
         data, addr = sock.recvfrom(1024)
         ip_equipamento = addr[0]
         if ip_equipamento not in equipamentos_executados:
