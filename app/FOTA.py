@@ -48,7 +48,7 @@ equipamentos_executados = {}
 blocos_de_dados = [...]  
 
 
-async def Arquivos(device_id):
+def Arquivos(device_id):
         print(device_id)
         sn = RSN_DICT[device_id]
         print(path_voz)
@@ -97,7 +97,7 @@ async def enviar_bloco(sock, bloco, endereco):
     await receber_resposta(sock)
     
 
-async def solicitar_serial_number(sock, device_id, addr):
+def solicitar_serial_number(sock, device_id, addr):
     xvm = XVM.generateXVM(device_id, str(8000).zfill(4), '>QSN<')
     print(xvm)
     sock.sendto(xvm.encode(), addr)
@@ -130,7 +130,7 @@ def enviar_mensagem_udp(sock, addr, mensagem):
         raise TryAgain
     return response
 
-async def envioScript(sock, device_id, addr):
+def envioScript(sock, device_id, addr):
     timeout = 5
     for i in path_script:
         with open(f'{i}') as f:
@@ -202,9 +202,9 @@ async def main():
             msg = xvmMessage[0]
             device_id = xvmMessage[1]
             if device_id not in RSN_DICT:
-                await solicitar_serial_number(sock, device_id, addr)
-                await envioScript(sock, device_id, addr)
-                blocos_de_dados = await Arquivos(device_id)
+                solicitar_serial_number(sock, device_id, addr)
+                # envioScript(sock, device_id, addr)
+                blocos_de_dados = Arquivos(device_id)
                 for bloco in blocos_de_dados:
                     # await enviar_bloco(sock, bloco, addr)
                     print(type(bloco))
