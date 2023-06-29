@@ -141,7 +141,7 @@ async def envioScript(sock, device_id, addr):
 
 def receber_resposta(sock):
     response, _ = sock.recvfrom(1024)
-    print('Resposta do equipamento:', response)
+    print('Resposta:', response)
 
 
             
