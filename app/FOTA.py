@@ -157,8 +157,8 @@ def fdir(sock, device_id, addr):
     xvm = XVM.generateXVM(device_id,str(8010).zfill(4),'>FDIR<')
     print(xvm)
     response = enviar_mensagem_udp(sock,addr,xvm)
-    if re.search('>.*EOF.*',response.decode()) is not None:
-        fdir = re.search('>.*EOF.*',response.decode())
+    if re.search(b'>.*EOF.*',response) is not None:
+        fdir = re.search(b'>.*EOF.*',response)
         fdir = fdir.group().split('_')[2].split(':')[1]
         print('\nFDIR:',fdir)
         return fdir 
