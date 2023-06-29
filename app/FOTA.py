@@ -127,6 +127,7 @@ async def envioScript(sock, device_id, addr):
         for i in range(len(comandos)):
             try:
                     xvm = XVM.generateXVM(device_id, str(8010+i).zfill(4), comandos[i])
+                    print(xvm)
                     # start_time = time.time()
                     # sock.sendto(xvm.encode(), addr)
                     # await receber_resposta(sock)
