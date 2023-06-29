@@ -143,13 +143,13 @@ def envioScript(sock, device_id, addr):
     msg = XVM.generateXVM(device_id, str(8100), f'>QEP_CFG<')
     sock.sendto(msg.encode(), addr)
 
-async def receber_resposta(sock):
-    timeout = 5
-    start_time = time.time()
-    response, _ = sock.recvfrom(1024)
-    if time.time() - start_time >= timeout:
-        return False
-    print('Resposta:', response)
+# async def receber_resposta(sock):
+#     timeout = 5
+#     start_time = time.time()
+#     response, _ = sock.recvfrom(1024)
+#     if time.time() - start_time >= timeout:
+#         return False
+#     print('Resposta:', response)
 
 
 @retry(stop=stop_after_attempt(10), wait=wait_fixed(2))
@@ -157,10 +157,10 @@ def fdir(sock, device_id, addr):
     xvm = XVM.generateXVM(device_id,str(8010).zfill(4),'>FDIR<')
     print(xvm)
     sock.sendto(xvm.encode(), addr)
-    response = sock.recvfrom(1024)
+    response, _ = sock.recvfrom(1024)
     print("cade fdir:",response)
     # response = enviar_mensagem_udp(sock,addr,xvm)
-    if re.search(b'EOF',response) is not None:
+    if re.search(b'EF',response) is not None:
         fdir = re.search(b'EOF',response)
         fdir = fdir.group().split('_')[2].split(':')[1]
         print('\nFDIR:',fdir)
