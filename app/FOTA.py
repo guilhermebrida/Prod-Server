@@ -114,14 +114,18 @@ async def solicitar_serial_number(sock, device_id, addr):
 
 @retry(stop=stop_after_attempt(30), wait=wait_fixed(2))
 def enviar_mensagem_udp(sock, addr, mensagem):
+    timeout = 3
     if type(mensagem) == 'bytes':
         sock.sendto(mensagem, addr)
     else:
         print(mensagem)
         sock.sendto(mensagem.encode(), addr)
+    start_time = time.time()
     response, _ = sock.recvfrom(1024)
     print(response)
     if re.search(b'RUV.*',response) or re.search(b'.*NAK.*',response):
+        raise TryAgain
+    if time.time() - start_time >= timeout:
         raise TryAgain
     return response
 
