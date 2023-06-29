@@ -173,10 +173,12 @@ async def criar(device_id,vozes):
         print('Ids no banco:',ID)
 
 async def main():
-    socket.setdefaulttimeout(5)
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind((host, porta))
     while True:
+        socket.setdefaulttimeout(5)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.bind((host, porta))
+        if TimeoutError:
+            continue
         print('aqui')
         data, addr = sock.recvfrom(1024)
         ip_equipamento = addr[0]
