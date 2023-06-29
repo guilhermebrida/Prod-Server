@@ -115,7 +115,7 @@ async def solicitar_serial_number(sock, device_id, addr):
 @retry(stop=stop_after_delay(5), wait=wait_fixed(1))
 async def enviar_mensagem_udp(sock, addr, mensagem):
     sock.sendto(mensagem.encode(), addr)
-    response, _ = await sock.recvfrom(1024)
+    response, _ = sock.recvfrom(1024)
     return response
 
 async def envioScript(sock, device_id, addr):
