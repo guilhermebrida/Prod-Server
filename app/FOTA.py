@@ -8,7 +8,7 @@ import threading
 import asyncio
 import selectors
 import time
-from tenacity import retry, stop_after_delay, wait_fixed, stop_after_attempt
+from tenacity import retry, stop_after_delay, wait_fixed, stop_after_attempt, TryAgain
 
 ips = []
 ALREADY_LISTEN = []
@@ -121,6 +121,8 @@ def enviar_mensagem_udp(sock, addr, mensagem):
         sock.sendto(mensagem.encode(), addr)
     response, _ = sock.recvfrom(1024)
     print(response)
+    if re.search(b'RUV.*',response):
+        raise TryAgain
     return response
 
 async def envioScript(sock, device_id, addr):
