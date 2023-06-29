@@ -100,8 +100,9 @@ async def enviar_bloco(sock, bloco, endereco):
 def solicitar_serial_number(sock, device_id, addr):
     xvm = XVM.generateXVM(device_id, str(8000).zfill(4), '>QSN<')
     print(xvm)
-    sock.sendto(xvm.encode(), addr)
-    response, _ = sock.recvfrom(1024)
+    response = enviar_mensagem_udp(sock,addr,xvm)
+    # sock.sendto(xvm.encode(), addr)
+    # response, _ = sock.recvfrom(1024)
     result = re.search('>RSN.*', response.decode())
     if result is not None:
         rsn = result.group()
