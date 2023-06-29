@@ -198,7 +198,7 @@ async def main():
                     enviar_mensagem_udp(sock, addr, bloco)
                 vozes = fdir(sock, device_id, addr)
                 if vozes is not None:
-                    if int(vozes) < 1:
+                    if int(vozes) == 1:
                         criar(device_id,vozes)
                 # equipamentos_executados[ip_equipamento] = True
         print('Mensagem recebida:', data.decode())
