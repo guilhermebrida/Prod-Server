@@ -152,16 +152,20 @@ async def receber_resposta(sock):
     print('Resposta:', response)
 
 
-            
+@retry
 def fdir(sock, device_id, addr):
     xvm = XVM.generateXVM(device_id,str(8010).zfill(4),'>FDIR<')
     print(xvm)
-    response = enviar_mensagem_udp(sock,addr,xvm)
+    sock.sendto(xvm.encode(), addr)
+    response, _ = sock.recvfrom(1024)
+    # response = enviar_mensagem_udp(sock,addr,xvm)
     if re.search(b'>.*EOF.*',response) is not None:
         fdir = re.search(b'>.*EOF.*',response)
         fdir = fdir.group().split('_')[2].split(':')[1]
         print('\nFDIR:',fdir)
         return fdir 
+    else:
+        raise TryAgain
 
 
 async def criar(device_id,vozes):
