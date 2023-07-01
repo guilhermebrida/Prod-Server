@@ -152,7 +152,7 @@ def envioScript(sock, device_id, addr):
 #     print('Resposta:', response)
 
 
-@retry(stop=stop_after_attempt(10), wait=wait_fixed(2))
+# @retry(stop=stop_after_attempt(10), wait=wait_fixed(2))
 def fdir(sock, device_id, addr):
     xvm = XVM.generateXVM(device_id,str(8010).zfill(4),'>FDIR<')
     # print(xvm)
@@ -165,8 +165,8 @@ def fdir(sock, device_id, addr):
         fdir = fdir.group().split('_')[2].split(':')[1]
         print('\nFDIR:',fdir)
         return fdir 
-    else:
-        raise TryAgain
+    # else:
+        # raise TryAgain
 
 
 async def criar(device_id,vozes):
