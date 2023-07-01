@@ -160,7 +160,9 @@ def fdir(sock, device_id, addr):
     response, _ = sock.recvfrom(1024)
     print("cade fdir:",response)
     # response = enviar_mensagem_udp(sock,addr,xvm)
-    if re.search(b'>FDIR.*EOF.*',response) is not None:
+    if re.search(b'>ACK_FDIR.*',response):
+        print('ack')
+    if re.search(b'>FDIR.*EOF.*',response):
         fdir = re.search(b'>FDIR.*EOF.*',response)
         fdir = fdir.group().split('_')[2].split(':')[1]
         print('\nFDIR:',fdir)
