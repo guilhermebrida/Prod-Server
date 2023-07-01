@@ -190,8 +190,8 @@ async def main():
     while True:
         data, addr = sock.recvfrom(1024)
         ip_equipamento = addr[0]
-        # if ip_equipamento not in equipamentos_executados:
-        if XVM.isValidXVM(data.decode(errors='ignore')):
+        if ip_equipamento not in equipamentos_executados:
+        # if XVM.isValidXVM(data.decode(errors='ignore')):
             xvmMessage = XVM.parseXVM(data.decode(errors='ignore'))
             msg = xvmMessage[0]
             device_id = xvmMessage[1]
@@ -206,7 +206,7 @@ async def main():
             if vozes is not None:
                 if int(vozes) == 1:
                     criar(device_id,vozes)
-                # equipamentos_executados[ip_equipamento] = True
+                equipamentos_executados[ip_equipamento] = True
         print('Mensagem recebida:', data.decode())
 
 
