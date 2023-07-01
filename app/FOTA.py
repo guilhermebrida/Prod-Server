@@ -202,11 +202,12 @@ async def main():
             for bloco in blocos_de_dados:
                 # await enviar_bloco(sock, bloco, addr)
                 enviar_mensagem_udp(sock, addr, bloco)
-            vozes = fdir(sock, device_id, addr)
-            if vozes is not None:
-                if int(vozes) == 1:
-                    criar(device_id,vozes)
                 equipamentos_executados[ip_equipamento] = True
+        vozes = fdir(sock, device_id, addr)
+        if vozes is not None:
+            if int(vozes) == 1:
+                criar(device_id,vozes)
+            equipamentos_executados[ip_equipamento] = True
         print('Mensagem recebida:', data.decode())
 
 
