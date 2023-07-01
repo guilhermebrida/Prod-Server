@@ -160,8 +160,8 @@ def fdir(sock, device_id, addr):
     response, _ = sock.recvfrom(1024)
     print("cade fdir:",response)
     # response = enviar_mensagem_udp(sock,addr,xvm)
-    if re.search(b'EF',response) is not None:
-        fdir = re.search(b'EOF',response)
+    if re.search(b'>FDIR.*EOF.*',response) is not None:
+        fdir = re.search(b'>FDIR.*EOF.*',response)
         fdir = fdir.group().split('_')[2].split(':')[1]
         print('\nFDIR:',fdir)
         return fdir 
@@ -181,6 +181,7 @@ async def criar(device_id,vozes):
         results = cursor.fetchall()
         ID = [result[0] for result in results]
         print('Ids no banco:',ID)
+
 
 async def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
