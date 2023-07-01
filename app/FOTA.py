@@ -158,8 +158,8 @@ def fdir(sock, device_id, addr):
     # print(xvm)
     # sock.sendto(xvm.encode(), addr)
     # response, _ = sock.recvfrom(1024)
-    print("cade fdir:",response)
     response = enviar_mensagem_udp(sock,addr,xvm)
+    print("cade fdir:",response)
     if re.search(b'FDIR.*EOF.*',response):
         fdir = re.search(b'FDIR.*EOF.*',response)
         fdir = fdir.group().split('_')[2].split(':')[1]
