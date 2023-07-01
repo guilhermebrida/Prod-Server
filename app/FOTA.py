@@ -195,17 +195,17 @@ async def main():
             xvmMessage = XVM.parseXVM(data.decode(errors='ignore'))
             msg = xvmMessage[0]
             device_id = xvmMessage[1]
-            if device_id not in RSN_DICT:
-                solicitar_serial_number(sock, device_id, addr)
-                # envioScript(sock, device_id, addr)
-                blocos_de_dados = Arquivos(device_id)
-                for bloco in blocos_de_dados:
-                    # await enviar_bloco(sock, bloco, addr)
-                    enviar_mensagem_udp(sock, addr, bloco)
-                vozes = fdir(sock, device_id, addr)
-                if vozes is not None:
-                    if int(vozes) == 1:
-                        criar(device_id,vozes)
+            # if device_id not in RSN_DICT:
+            solicitar_serial_number(sock, device_id, addr)
+            # envioScript(sock, device_id, addr)
+            blocos_de_dados = Arquivos(device_id)
+            for bloco in blocos_de_dados:
+                # await enviar_bloco(sock, bloco, addr)
+                enviar_mensagem_udp(sock, addr, bloco)
+            vozes = fdir(sock, device_id, addr)
+            if vozes is not None:
+                if int(vozes) == 1:
+                    criar(device_id,vozes)
                 # equipamentos_executados[ip_equipamento] = True
         print('Mensagem recebida:', data.decode())
 
