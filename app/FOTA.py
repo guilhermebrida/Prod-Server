@@ -191,10 +191,10 @@ async def main():
         data, addr = sock.recvfrom(1024)
         ip_equipamento = addr[0]
         # if ip_equipamento not in equipamentos_executados:
-        # if XVM.isValidXVM(data.decode(errors='ignore')):
-        xvmMessage = XVM.parseXVM(data.decode(errors='ignore'))
-        msg = xvmMessage[0]
-        device_id = xvmMessage[1]
+        if XVM.isValidXVM(data.decode(errors='ignore')):
+            xvmMessage = XVM.parseXVM(data.decode(errors='ignore'))
+            msg = xvmMessage[0]
+            device_id = xvmMessage[1]
         if device_id not in RSN_DICT:
             solicitar_serial_number(sock, device_id, addr)
                 # envioScript(sock, device_id, addr)
