@@ -152,16 +152,16 @@ def envioScript(sock, device_id, addr):
 #     print('Resposta:', response)
 
 
-# @retry(stop=stop_after_attempt(10), wait=wait_fixed(2))
+@retry(stop=stop_after_attempt(10), wait=wait_fixed(2))
 def fdir(sock, device_id, addr):
     xvm = XVM.generateXVM(device_id,str(8010).zfill(4),'>FDIR<')
     # print(xvm)
-    # sock.sendto(xvm.encode(), addr)
-    # response, _ = sock.recvfrom(1024)
-    response = enviar_mensagem_udp(sock,addr,xvm)
+    sock.sendto(xvm.encode(), addr)
+    response, _ = sock.recvfrom(1024)
+    # response = enviar_mensagem_udp(sock,addr,xvm)
     print("cade fdir:",response)
     if re.search(b'ACK_FDIR',response):
-        print('entrei')
+        time.sleep(1)
     if re.search(b'FDIR.*EOF.*',response):
         fdir = re.search('FDIR.*EOF.*',response.decode())
         fdir = fdir.group().split('_')[2].split(':')[1]
