@@ -204,11 +204,12 @@ async def main():
                     enviar_mensagem_udp(sock, addr, bloco)
                 equipamentos_executados[ip_equipamento] = True
                 print(equipamentos_executados)
-        if equipamentos_executados[ip_equipamento] is True and vozes is None:
+        if equipamentos_executados[ip_equipamento] is True and device_id not in VOZ:
             vozes = fdir(sock, device_id, addr)
             if vozes is not None:
                 if int(vozes) == 1:
                     criar(device_id,vozes)
+                    VOZ.append(device_id)
                     break
             # equipamentos_executados[ip_equipamento] = True
         print('Mensagem recebida:', data)
