@@ -204,7 +204,7 @@ async def main():
                     enviar_mensagem_udp(sock, addr, bloco)
                 equipamentos_executados[ip_equipamento] = True
                 print(equipamentos_executados)
-        if equipamentos_executados[ip_equipamento] is True:
+        if equipamentos_executados[ip_equipamento] is True and vozes is None:
             vozes = fdir(sock, device_id, addr)
             if vozes is not None:
                 if int(vozes) == 1:
