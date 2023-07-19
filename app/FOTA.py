@@ -160,12 +160,13 @@ def fdir(sock, device_id, addr):
     # response, _ = sock.recvfrom(1024)
     response = enviar_mensagem_udp(sock,addr,xvm)
     print("cade fdir:",response)
-    if re.search(b'BINA.*',response) is None:
-        if re.search(b'FDIR.*EOF.*',response):
-            fdir = re.search('FDIR.*EOF.*',response.decode())
-            fdir = fdir.group().split('_')[2].split(':')[1]
-            print('\nFDIR:',fdir)
-            return fdir 
+    if re.search(b'ACK_FDIR',response):
+        print('entrei')
+    if re.search(b'FDIR.*EOF.*',response):
+        fdir = re.search('FDIR.*EOF.*',response.decode())
+        fdir = fdir.group().split('_')[2].split(':')[1]
+        print('\nFDIR:',fdir)
+        return fdir 
     # else:
         # raise TryAgain
 
