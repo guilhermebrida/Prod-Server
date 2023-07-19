@@ -91,10 +91,10 @@ def find(pasta):
     return path
 
 
-async def enviar_bloco(sock, bloco, endereco):
-    sock.sendto(bloco, endereco)
+# async def enviar_bloco(sock, bloco, endereco):
+    # sock.sendto(bloco, endereco)
     # await asyncio.wait_for(receber_resposta(sock), timeout=3)
-    await receber_resposta(sock)
+    # await receber_resposta(sock)
     
 
 def solicitar_serial_number(sock, device_id, addr):
@@ -161,7 +161,7 @@ def fdir(sock, device_id, addr):
     response = enviar_mensagem_udp(sock,addr,xvm)
     print("cade fdir:",response)
     if re.search(b'FDIR.*EOF.*',response):
-        fdir = re.search(b'FDIR.*EOF.*',response.decode())
+        fdir = re.search('FDIR.*EOF.*',response.decode())
         fdir = fdir.group().split('_')[2].split(':')[1]
         print('\nFDIR:',fdir)
         return fdir 
@@ -195,19 +195,22 @@ async def main():
             xvmMessage = XVM.parseXVM(data.decode(errors='ignore'))
             msg = xvmMessage[0]
             device_id = xvmMessage[1]
-            # if device_id not in RSN_DICT:
-            solicitar_serial_number(sock, device_id, addr)
-            # envioScript(sock, device_id, addr)
-            blocos_de_dados = Arquivos(device_id)
-            for bloco in blocos_de_dados:
-                # await enviar_bloco(sock, bloco, addr)
-                enviar_mensagem_udp(sock, addr, bloco)
-                equipamentos_executados[ip_equipamento] = True
-        vozes = fdir(sock, device_id, addr)
-        if vozes is not None:
-            if int(vozes) == 1:
-                criar(device_id,vozes)
-            equipamentos_executados[ip_equipamento] = True
+            if device_id not in RSN_DICT:
+                solicitar_serial_number(sock, device_id, addr)
+                # envioScript(sock, device_id, addr)
+                blocos_de_dados = Arquivos(device_id)
+                for bloco in blocos_de_dados:
+                    # await enviar_bloco(sock, bloco, addr)
+                    enviar_mensagem_udp(sock, addr, bloco)
+                    equipamentos_executados[ip_equipamento] = True
+                    print(equipamentos_executados)
+        if equipamentos_executados[ip_equipamento] is True:
+            vozes = fdir(sock, device_id, addr)
+            if vozes is not None:
+                if int(vozes) == 1:
+                    criar(device_id,vozes)
+                    break
+            # equipamentos_executados[ip_equipamento] = True
         print('Mensagem recebida:', data.decode())
 
 
