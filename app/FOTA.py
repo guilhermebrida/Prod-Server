@@ -169,7 +169,7 @@ def fdir(sock, device_id, addr):
         # raise TryAgain
 
 
-async def criar(device_id,vozes):
+def criar(device_id,vozes):
     try:
         sn = RSN_DICT[device_id]
         cursor.execute('INSERT INTO vozes ("IMEI", "SN", "VOZES") values (\'{}\', \'{}\', \'{}\');'.format(device_id, sn,vozes))
@@ -202,8 +202,8 @@ async def main():
                 for bloco in blocos_de_dados:
                     # await enviar_bloco(sock, bloco, addr)
                     enviar_mensagem_udp(sock, addr, bloco)
-                    equipamentos_executados[ip_equipamento] = True
-                    print(equipamentos_executados)
+                equipamentos_executados[ip_equipamento] = True
+                print(equipamentos_executados)
         if equipamentos_executados[ip_equipamento] is True:
             vozes = fdir(sock, device_id, addr)
             if vozes is not None:
