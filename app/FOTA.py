@@ -211,7 +211,7 @@ async def main():
                     criar(device_id,vozes)
                     break
             # equipamentos_executados[ip_equipamento] = True
-        print('Mensagem recebida:', data.decode())
+        print('Mensagem recebida:', data)
 
 
 
