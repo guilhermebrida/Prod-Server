@@ -191,7 +191,7 @@ async def main():
         data, addr = sock.recvfrom(1024)
         ip_equipamento = addr[0]
         # if ip_equipamento not in equipamentos_executados:
-        if XVM.isValidXVM(data.decode(errors='ignore')):
+        if re.search('BINA.*',data.decode(errors='ignore')) is None:
             xvmMessage = XVM.parseXVM(data.decode(errors='ignore'))
             msg = xvmMessage[0]
             device_id = xvmMessage[1]
