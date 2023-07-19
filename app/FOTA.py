@@ -190,20 +190,21 @@ async def main():
     while True:
         data, addr = sock.recvfrom(1024)
         ip_equipamento = addr[0]
-        if ip_equipamento not in equipamentos_executados:
+        # if ip_equipamento not in equipamentos_executados:
         # if XVM.isValidXVM(data.decode(errors='ignore')):
-            xvmMessage = XVM.parseXVM(data.decode(errors='ignore'))
-            msg = xvmMessage[0]
-            device_id = xvmMessage[1]
-            if device_id not in RSN_DICT:
-                solicitar_serial_number(sock, device_id, addr)
+        xvmMessage = XVM.parseXVM(data.decode(errors='ignore'))
+        msg = xvmMessage[0]
+        device_id = xvmMessage[1]
+        if device_id not in RSN_DICT:
+            solicitar_serial_number(sock, device_id, addr)
                 # envioScript(sock, device_id, addr)
-                blocos_de_dados = Arquivos(device_id)
-                for bloco in blocos_de_dados:
+            blocos_de_dados = Arquivos(device_id)
+        if ip_equipamento not in equipamentos_executados:
+            for bloco in blocos_de_dados:
                     # await enviar_bloco(sock, bloco, addr)
-                    enviar_mensagem_udp(sock, addr, bloco)
-                equipamentos_executados[ip_equipamento] = True
-                print(equipamentos_executados)
+                enviar_mensagem_udp(sock, addr, bloco)
+            equipamentos_executados[ip_equipamento] = True
+            print(equipamentos_executados)
         if equipamentos_executados[ip_equipamento] is True and device_id not in VOZ:
             vozes = fdir(sock, device_id, addr)
             if vozes is not None:
